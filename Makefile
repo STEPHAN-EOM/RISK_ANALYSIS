@@ -1,24 +1,40 @@
 CXX = g++
-CXXFLAGS = -W -Wall -std=c++17 
+CXXFLAGS = -Wall -Wextra -std=c++17
 
-all: main
-######################################
+SOURCE = BSModel.h FXModel.h IRModel.h MCSimulation.h RiskAnalysis.h
 
-mc_simul.o: mc_simul.cpp mc_simul.h
-	$(CXX) $(CXXFLAGS) -c mc_simul.cpp -o mc_simul.o
+all: main main_bs
+#######################################################
+FXModel.o: FXModel.cc FXModel.h
+	$(CXX) $(CXXFLAGS) -o FXModel.o -c FXModel.cc
 
-aad.o: aad.cpp aad.h
-	$(CXX) $(CXXFLAGS) -c aad.cpp -o aad.o
+IRModel.o: IRModel.cc IRModel.h
+	$(CXX) $(CXXFLAGS) -o IRModel.o -c IRModel.cc
 
-main.o: main.cpp mc_simul.h aad.h
-	$(CXX) $(CXXFLAGS) -c main.cpp -o main.o
+MCSimulation.o: MCSimulation.cc MCSimulation.h FXModel.h IRModel.h
+	$(CXX) $(CXXFLAGS) -o MCSimulation.o -c MCSimulation.cc
 
-main: main.o mc_simul.o aad.o
-	$(CXX) $(CXXFLAGS) -o main main.o mc_simul.o aad.o
+RiskAnalysis.o: RiskAnalysis.cc RiskAnalysis.h MCSimulation.h
+	$(CXX) $(CXXFLAGS) -o RiskAnalysis.o -c RiskAnalysis.cc
 
+main.o: main.cc $(SOURCE)
+	$(CXX) $(CXXFLAGS) -o main.o -c main.cc 
 
-######################################
+main: main.o BSModel.o FXModel.o IRModel.o MCSimulation.o RiskAnalysis.o 
+	$(CXX) $(CXXFLAGS) -o main main.o BSModel.o FXModel.o IRModel.o MCSimulation.o RiskAnalysis.o
+
+BSModel.o: BSModel.cc BSModel.h
+	$(CXX) $(CXXFLAGS) -o BSModel.o -c BSModel.cc
+
+main_bs.o: main_bs.cc BSModel.h
+	$(CXX) $(CXXFLAGS) -o main_bs.o -c main_bs.cc 
+
+main_bs: main_bs.o
+	$(CXX) $(CXXFLAGS) -o main_bs main_bs.o BSModel.o
+
+#######################################################
 .Phony: all clean
 
 clean:
-	rm -f *.o main
+	rm -f *.o main main_bs
+
