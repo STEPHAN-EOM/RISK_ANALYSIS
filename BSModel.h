@@ -17,6 +17,7 @@ public:
         std::cout << "Destroying BSModel" << "\n";
     };
 
+    double calculateFXForward() const;
     double calculateCallOptionPrice() const;
     double calculatePutOptionPrice() const;
     

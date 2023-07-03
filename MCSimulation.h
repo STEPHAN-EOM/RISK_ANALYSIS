@@ -1,30 +1,33 @@
 #ifndef MCSIMULATION_H
 #define MCSIMULATION_H
 
-#include "IRModel.h"
-#include "FXModel.h"
 #include <iostream>
-#include <random>
-#include <vector>   
+#include <random> 
+#include <functional>
+#include <algorithm>
 
 class MCSimulation{
-    FXModel fx_model;
-    IRModel ir_model;
-    std::mt19937_64 rng;
 
-    public:
-        MCSimulation(double fx_initial, double fx_drift, double fx_vol, double r_dom, double r_foreign);
+    public: 
+        MCSimulation(double fx_initial, double fx_vol, double r_dom, double r_foreign, int num_sim, double T);
         ~MCSimulation(){
             std::cout << "Destroying Monte-Carlo Simulation" << "\n";
         };
 
-        double simulate_Path(double T);
-        double cal_sensitivity(size_t param_index);
+        double MC_Simulation();
+        double MC_Simulation_FW(double FW_Rate);
+        double MC_Simulation_Option(double K);
+        
 
     private:
-        double generate_RN();
-        double get_param(size_t param_index) const;
-        void set_param(size_t param_index, double value);
+        double fx_initial;
+        double fx_vol;
+        double r_dom;
+        double r_foreign;
+        int num_sim;
+        double maturity;
+        std::default_random_engine generator;
+        std::normal_distribution<double> distribution;
 };
 
 
