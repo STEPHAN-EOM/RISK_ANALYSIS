@@ -5,6 +5,7 @@
 #include <random> 
 #include <functional>
 #include <algorithm>
+#include <utility>
 
 class MCSimulation{
 
@@ -14,9 +15,8 @@ class MCSimulation{
             std::cout << "Destroying Monte-Carlo Simulation" << "\n";
         };
 
-        double MC_Simulation();
-        double MC_Simulation_FW(double FW_Rate);
-        double MC_Simulation_Option(double K);
+        std::pair<double, double> MC_Simulation(double K);
+        //double MC_Simulation_FW(double FW_Rate);
         
 
     private:

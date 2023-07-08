@@ -18,31 +18,33 @@ int main(){
     double eps = 0.001;             // Epsilon
     
     // Create Monte-Carlo simulation Object
-    MCSimulation FX_simulator(fx_initial, fx_vol, r_dom, r_foreign, num_sims, T);
-    MCSimulation FX_simulator1(fx_initial + eps, fx_vol, r_dom, r_foreign, num_sims, T);
-    MCSimulation FX_simulator2(fx_initial, fx_vol + eps, r_dom, r_foreign, num_sims, T);
+    MCSimulation FX_simulator(fx_initial, fx_vol, r_dom, r_foreign, num_sims, T);           // Base Model
+    MCSimulation FX_simulator1(fx_initial + eps, fx_vol, r_dom, r_foreign, num_sims, T);    // For Sensitivity, Delta
+    MCSimulation FX_simulator2(fx_initial, fx_vol + eps, r_dom, r_foreign, num_sims, T);    // For Sensitivity, Vega
 
     // Calculate Simulation for FX rate
-    double FX_result = FX_simulator.MC_Simulation();
-
-    // Display Results
-    std::cout << "\nSimulation Result: " << FX_result << std::endl;
-
     // Step.2 Pricing an FX forward and FX Option using this framework
     double Strike = 1300.0;
-    double Option_result = FX_simulator.MC_Simulation_Option(Strike);
-    std::cout << "Simulation Result(FX Option): " << Option_result << std::endl;
+    std::pair<double, double> FX_result = FX_simulator.MC_Simulation(Strike);
 
+    // Display Results
+    std::cout << "\nSimulation Result: " << FX_result.first << std::endl;
+    std::cout << "Simulation Result(FX Option): " << FX_result.second << std::endl;
+
+    
     // Step.3 Use bump and reval to compute options on these instruments
-    double Option_result1 = FX_simulator1.MC_Simulation_Option(Strike);
-    double Option_result2 = FX_simulator2.MC_Simulation_Option(Strike);
-    double delta_bump = (Option_result1 - Option_result) / eps;
-    double vega_bump = (Option_result2 - Option_result) / eps;
-    std::cout << "Simulation Result(FX Option1): " << Option_result1 << std::endl;
-    std::cout << "Simulation Result(FX Option2): " << Option_result2 << std::endl;
+    std::pair<double, double> Option_result1 = FX_simulator1.MC_Simulation(Strike);
+    std::pair<double, double>Option_result2 = FX_simulator2.MC_Simulation(Strike);
+    double delta_bump = (Option_result1.second - FX_result.second) / eps;
+    double vega_bump = (Option_result2.second - FX_result.second) / eps;
+
+    // Display Results 
+    std::cout << "Simulation Result(FX Option1): " << Option_result1.second << std::endl;
+    std::cout << "Simulation Result(FX Option2): " << Option_result2.second << std::endl;
+
+    std::cout << "\n======== Sensitivities by bump and reval with (S(T0): "<< fx_initial << ", K:" << Strike << ") ========\n"; 
     std::cout << "Simulation Result(Option_delta): " << delta_bump << std::endl;
     std::cout << "Simulation Result(Option_vega): " << vega_bump << std::endl;
-
 
 
     // Step.4 Black-Scholes Fomular for FX Option
@@ -57,7 +59,7 @@ int main(){
     double call_op = bsmodel.calculateCallOptionPrice();
     double put_op = bsmodel.calculatePutOptionPrice();
 
-    std::cout << "\n======== Option Price(S(T0): "<< spot_p << ", K: " << strike_p << ") ========\n";
+    std::cout << "======== Option Price(S(T0): "<< spot_p << ", K: " << strike_p << ") ========\n";
     std::cout << "Forward Price: " << fx_forward << "\n";
     std::cout << "Call Option Price: " << call_op << "\n";
     std::cout << "Put Option Price: " << put_op << "\n";
@@ -83,10 +85,12 @@ int main(){
     double maturity1 = 1.0; 
 
     BSModel bsmodel1(spot_p1, strike_p1, risk_neutral1, vol1, maturity1);
+    //double fx_forward1 = bsmodel1.calculateFXForward();
     double call_op1 = bsmodel1.calculateCallOptionPrice();
     double put_op1 = bsmodel1.calculatePutOptionPrice();
 
-    std::cout << "\n======== Option Price(S(t0): "<< spot_p1 << ", K: " << strike_p1 << ") ========\n";
+    std::cout << "======== Option Price(S(t0): "<< spot_p1 << ", K: " << strike_p1 << ") ========\n";
+    //std::cout << "Forward Price: " << fx_forward1 << "\n";
     std::cout << "Call Option Price: " << call_op1 << "\n";
     std::cout << "Put Option Price: " << put_op1 << "\n";
 

@@ -12,7 +12,8 @@ BSModel::BSModel(double spotPrice, double strikePrice, double riskFreeRate, doub
       };
 
 double BSModel::calculateFXForward() const {
-    return spotPrice * exp(-riskFreeRate * timeToMaturity) - strikePrice;
+    //return spotPrice * exp(-riskFreeRate * timeToMaturity) - strikePrice;
+    return spotPrice * exp(-riskFreeRate * timeToMaturity);
 }
 
 double BSModel::calculateCallOptionPrice() const {
@@ -82,11 +83,11 @@ double BSModel::calculateRho() const {
 }
 
 double BSModel::calculateOptionPrice(double d1, double d2) const {
-    double callOptionPrice =
+    double OptionPrice =
         spotPrice * std::exp(-riskFreeRate * timeToMaturity) * normcdf(d1) - strikePrice * std::exp(-riskFreeRate * timeToMaturity) * normcdf(d2);
     
     //std::cout << "Progress: BS_CalOP" << std::endl;
-    return callOptionPrice;
+    return OptionPrice;
 }
 
 double BSModel::normcdf(double x) const {

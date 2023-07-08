@@ -8,7 +8,7 @@ MCSimulation::MCSimulation(double fx_initial, double fx_vol, double r_dom, doubl
         };
         
 
-double MCSimulation::MC_Simulation(){
+std::pair<double, double> MCSimulation::MC_Simulation(double K){
     
     // Initialise elementary parameters for the simulation
     double dt = maturity / 365.0;
@@ -16,43 +16,27 @@ double MCSimulation::MC_Simulation(){
     double first = (ir_rate - (0.5 * fx_vol * fx_vol)) * dt;
     double second = fx_vol * sqrt(dt);
 
-    double sum = 0.0;
+    double sum_fx = 0.0;
+    double sum_op = 0.0;
+    double payoff = 0.0;
 
+    // Monte-Carlo Simulation
     for(int i = 0; i < num_sim; ++i){
         double rand = distribution(generator);
         double fx_rate = fx_initial * exp(first * 365) * exp(second * sqrt(365) * rand);
 
-        sum += fx_rate;
+        payoff = std::max(fx_rate - K, 0.0); 
+
+        sum_fx += fx_rate;
+        sum_op += payoff;
     }
 
-    double average = sum / num_sim;
-    double discount = exp(-ir_rate);
-    double result = average * discount;
+    double average_fx = sum_fx / num_sim;
+    double average_op = sum_op / num_sim;
+    double discount = exp(-r_dom);          // Discount by Domestic Interest Rate
 
-    return result;
-}
+    double result_fx = average_fx * discount;
+    double result_op = average_op * discount;
 
-double MCSimulation::MC_Simulation_Option(double K){
-
-    // Initialise elementary parameters for the simulation
-    double dt = maturity / 365.0;
-    double ir_rate = r_foreign - r_dom;
-    double first = (ir_rate - (0.5 * fx_vol * fx_vol)) * dt;
-    double second = fx_vol * sqrt(dt);
-
-    double sum = 0.0;
-    double payoff;
-    for(int i = 0; i < num_sim; ++i){
-        double rand = distribution(generator);
-        double fx_rate = fx_initial * exp(first * 365) * exp(second * sqrt(365) * rand);
-
-        payoff = std::max(fx_rate - K, 0.0);
-        sum += payoff;
-    }
-
-    double average = sum / num_sim;
-    double discount = exp(-ir_rate);
-    double result = average * discount;
-
-    return result;
+    return std::make_pair(result_fx, result_op);
 }
