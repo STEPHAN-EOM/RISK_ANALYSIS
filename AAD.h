@@ -19,8 +19,20 @@ class DualNumber {
         DualNumber operator-(const DualNumber& other);
         DualNumber operator*(const DualNumber& other);
         DualNumber operator/(const DualNumber& other);
+
+        DualNumber operator+(double rhs) const;
+        DualNumber operator-(double rhs) const;
+        DualNumber operator*(double rhs) const;
+        DualNumber operator/(double rhs) const;
+        DualNumber operator-() const;
+
+        friend DualNumber operator*(double lhs, const DualNumber& rhs);
+
 };
 
+DualNumber log(const DualNumber& X);
+DualNumber sqrt(const DualNumber& X);
+DualNumber exp(const DualNumber& X);
 DualNumber N(DualNumber X);
 DualNumber BS_Call(DualNumber S, DualNumber K, DualNumber T, DualNumber r, DualNumber sigma);
 

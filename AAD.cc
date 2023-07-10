@@ -29,6 +29,50 @@ DualNumber DualNumber::operator/(const DualNumber& other){
                       (this-> second_derivative * other.value - 2 * this->derivative * other.derivative + this->value * other.second_derivative) / (other.value * other.value));
 }
 
+DualNumber DualNumber::operator+(double rhs) const {
+    return DualNumber(value + rhs, derivative, second_derivative);
+}
+
+DualNumber DualNumber::operator-(double rhs) const {
+    return DualNumber(value - rhs, derivative, second_derivative);
+}
+
+DualNumber DualNumber::operator*(double rhs) const {
+    return DualNumber(value * rhs, derivative * rhs, second_derivative * rhs * rhs);
+}
+
+DualNumber operator*(double lhs, const DualNumber& rhs) {
+    return DualNumber(lhs * rhs.value, lhs * rhs.derivative, lhs * rhs.second_derivative);
+}
+
+DualNumber DualNumber::operator/(double rhs) const {
+    return DualNumber(value / rhs, derivative / rhs, second_derivative / (rhs * rhs));
+}
+
+DualNumber DualNumber::operator-() const {
+    return DualNumber(-value, -derivative, -second_derivative);
+}
+
+DualNumber log(const DualNumber& X) {
+    return DualNumber(std::log(X.value), 
+                      X.derivative / X.value, 
+                      (X.second_derivative - (X.derivative * X.derivative) / X.value) / X.value);
+}
+
+DualNumber sqrt(const DualNumber& X) {
+    double sqrt_val = std::sqrt(X.value);
+    return DualNumber(sqrt_val, 
+                      0.5 * X.derivative / sqrt_val,
+                      (0.5 * X.second_derivative / sqrt_val) - (0.25 * X.derivative * X.derivative / (X.value * sqrt_val)));
+}
+
+DualNumber exp(const DualNumber& X) {
+    double exp_val = std::exp(X.value);
+    return DualNumber(exp_val, 
+                      X.derivative * exp_val,
+                      (X.second_derivative * exp_val) + (X.derivative * X.derivative * exp_val));
+}
+
 DualNumber N(DualNumber X){
     static const double inv_sqrt_2pi = 0.3989422804014327;
     double value = 0.5 * erfc(-X.value * M_SQRT1_2);
@@ -56,6 +100,29 @@ Greeks computeGreeks(double S_val, double K_val, double T_val, double r_val, dou
     Greeks greeks;
     greeks.delta = BS_Call(S, K, T, r, sigma).derivative;
 
+    S.derivative = 0.0;
+    S.second_derivative = 1.0;
+    greeks.gamma = BS_Call(S, K, T, r, sigma).second_derivative;
 
+    S.second_derivative = 0.0;
+    sigma.derivative = 1.0;
+    greeks.vega = BS_Call(S, K, T, r, sigma).derivative;
+
+    sigma.derivative = 0.0;
+    r.derivative = 1.0;
+    greeks.rho = BS_Call(S, K, T, r, sigma).derivative;
+
+    r.derivative = 0.0;
+    T.derivative = 1.0;
+    greeks.theta = -BS_Call(S, K, T, r, sigma).derivative;
+
+    // Compute vanna, change of delta with respect to volatility
+    T.derivative = 0.0;
+    sigma.derivative = 0.0;
+    S.derivative = 1.0;
+    sigma.second_derivative = 1.0;
+    greeks.vanna = BS_Call(S, K, T, r, sigma).second_derivative;
+
+    return greeks;
 
 }
