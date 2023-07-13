@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++17
 
-SOURCE = BSModel.h  MCSimulation.h AAD.h
+SOURCE = BSModel.h MCSimulation.h AAD.h  AAD_Tape.h
 
 all: main main_bs
 #######################################################
@@ -11,7 +11,7 @@ MCSimulation.o: MCSimulation.cc MCSimulation.h
 BSModel.o: BSModel.cc BSModel.h
 	$(CXX) $(CXXFLAGS) -o BSModel.o -c BSModel.cc	
 
-AAD.o: AAD.cc AAD.h
+AAD.o: AAD.cc AAD.h AAD_Tape.h
 	$(CXX) $(CXXFLAGS) -o AAD.o -c AAD.cc
 
 main.o: main.cc $(SOURCE)

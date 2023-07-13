@@ -15,7 +15,8 @@ class MCSimulation{
             std::cout << "Destroying Monte-Carlo Simulation" << "\n";
         };
 
-        std::pair<double, double> MC_Simulation(double K);
+        //std::pair<double, double> MC_Simulation(double K);
+        std::pair<double, double> MC_Simulation(double K, int num_step);
         //double MC_Simulation_FW(double FW_Rate);
         
 

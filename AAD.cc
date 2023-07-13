@@ -1,128 +1,232 @@
 #include "AAD.h"
 
-DualNumber::DualNumber(double value, double derivative, double second_derivative)
-    : value(value), derivative(derivative), second_derivative(second_derivative){
-        std::cout << "Constructing Dual Number" << std::endl;
+DualNumber::DualNumber(double value, double derivative, Tape& tape)
+    : value(value), derivative(derivative), tape(tape) {
+        //std::cout << "Constructing Dual Number" << std::endl;
     };
 
-DualNumber DualNumber::operator+(const DualNumber& other){
-    return DualNumber(this-> value + other.value,
-                      this-> derivative + other.derivative,
-                      this-> second_derivative + other.second_derivative);
+inline DualNumber operator+(const DualNumber& lhs, const DualNumber& rhs){
+    DualNumber result(lhs.value + rhs.value, lhs.derivative + rhs.derivative, lhs.tape);
+    result.tape.add([&result, &lhs, &rhs](){
+        result.derivative += (lhs.derivative + rhs.derivative);
+    });
+
+    return result;
 }
 
-DualNumber DualNumber::operator-(const DualNumber& other){
-    return DualNumber(this-> value - other.value,
-                      this-> derivative - other.derivative,
-                      this-> second_derivative - other.second_derivative);
+inline DualNumber operator-(const DualNumber& lhs, const DualNumber& rhs){
+    DualNumber result(lhs.value - rhs.value, lhs.derivative - rhs.derivative, lhs.tape);
+    result.tape.add([&result, &lhs, &rhs](){
+        result.derivative += (lhs.derivative - rhs.derivative);
+    });
+
+    return result;
 }
 
-DualNumber DualNumber::operator*(const DualNumber& other){
-    return DualNumber(this-> value * other.value,
-                      this-> value * other.derivative + this->derivative * other.value,
-                      this-> second_derivative * other.value + 2 * this->derivative * other.derivative + this->value * other.second_derivative);
+inline DualNumber operator*(const DualNumber& lhs, const DualNumber& rhs){
+    DualNumber result(lhs.value * rhs.value, lhs.value * rhs.derivative + lhs.derivative * rhs.value, lhs.tape);
+    result.tape.add([&result, &lhs, &rhs](){
+        result.derivative += (rhs.value * result.derivative + lhs.value * result.derivative);
+    });
+
+    return result;
 }
 
-DualNumber DualNumber::operator/(const DualNumber& other){
-    return DualNumber(this-> value / other.value,
-                      (this-> derivative * other.value - this->value * other.derivative) / (other.value * other.value),
-                      (this-> second_derivative * other.value - 2 * this->derivative * other.derivative + this->value * other.second_derivative) / (other.value * other.value));
+inline DualNumber operator/(const DualNumber& lhs, const DualNumber& rhs){
+    if (rhs.value == 0.0) throw std::runtime_error("Division by zero");
+    DualNumber result(lhs.value / rhs.value, 
+                      (lhs.derivative * rhs.value - lhs.value * rhs.derivative) / (rhs.value * rhs.value), lhs.tape);
+    result.tape.add([&result, &lhs, &rhs]() {
+        result.derivative += ((result.derivative / rhs.value) - (lhs.value * result.derivative / (rhs.value * rhs.value)));
+    });
+
+    return result;
 }
 
-DualNumber DualNumber::operator+(double rhs) const {
-    return DualNumber(value + rhs, derivative, second_derivative);
+inline DualNumber operator+(const DualNumber& lhs, const double& rhs){
+    DualNumber result(lhs.value + rhs, lhs.derivative, lhs.tape);
+    result.tape.add([&result, &lhs](){
+        result.derivative += lhs.derivative;
+    });
+
+    return result;
 }
 
-DualNumber DualNumber::operator-(double rhs) const {
-    return DualNumber(value - rhs, derivative, second_derivative);
+inline DualNumber operator-(const DualNumber& lhs, const double& rhs){
+    DualNumber result(lhs.value - rhs, lhs.derivative, lhs.tape);
+    result.tape.add([&result, &lhs](){
+        result.derivative += lhs.derivative;
+    });
+
+    return result;
 }
 
-DualNumber DualNumber::operator*(double rhs) const {
-    return DualNumber(value * rhs, derivative * rhs, second_derivative * rhs * rhs);
+inline DualNumber operator*(const DualNumber& lhs, const double& rhs){
+    DualNumber result(lhs.value * rhs, lhs.derivative * rhs, lhs.tape);
+    result.tape.add([&result, &lhs, rhs](){
+        result.derivative += lhs.derivative * rhs;
+    });
+
+    return result;
 }
 
-DualNumber operator*(double lhs, const DualNumber& rhs) {
-    return DualNumber(lhs * rhs.value, lhs * rhs.derivative, lhs * rhs.second_derivative);
+inline DualNumber operator/(const DualNumber& lhs, const double& rhs){
+    if (rhs == 0.0) throw std::runtime_error("Division by zero");
+    DualNumber result(lhs.value / rhs, lhs.derivative / rhs, lhs.tape);
+    result.tape.add([&result, &lhs, rhs]() {
+        result.derivative += lhs.derivative / rhs;
+    });
+
+    return result;    
 }
 
-DualNumber DualNumber::operator/(double rhs) const {
-    return DualNumber(value / rhs, derivative / rhs, second_derivative / (rhs * rhs));
+inline DualNumber operator+(const double& lhs, const DualNumber& rhs){
+    DualNumber result(lhs + rhs.value, rhs.derivative, rhs.tape);
+    result.tape.add([&result, &rhs](){
+        result.derivative += rhs.derivative;
+    });
+
+    return result;
 }
 
-DualNumber DualNumber::operator-() const {
-    return DualNumber(-value, -derivative, -second_derivative);
+inline DualNumber operator-(const double& lhs, const DualNumber& rhs){
+    DualNumber result(lhs -rhs.value, -rhs.derivative, rhs.tape);
+    result.tape.add([&result, &rhs](){
+        result.derivative -= rhs.derivative;
+    });
+
+    return result;
 }
 
-DualNumber log(const DualNumber& X) {
-    return DualNumber(std::log(X.value), 
-                      X.derivative / X.value, 
-                      (X.second_derivative - (X.derivative * X.derivative) / X.value) / X.value);
+inline DualNumber operator*(const double& lhs, const DualNumber& rhs){
+    DualNumber result(lhs * rhs.value, lhs * rhs.derivative, rhs.tape);
+    result.tape.add([&result, &rhs, lhs](){
+        result.derivative += lhs * rhs.derivative;
+    });
+
+    return result;
 }
 
-DualNumber sqrt(const DualNumber& X) {
-    double sqrt_val = std::sqrt(X.value);
-    return DualNumber(sqrt_val, 
-                      0.5 * X.derivative / sqrt_val,
-                      (0.5 * X.second_derivative / sqrt_val) - (0.25 * X.derivative * X.derivative / (X.value * sqrt_val)));
+inline DualNumber operator/(const double& lhs, const DualNumber& rhs){
+    if (rhs.value == 0.0) throw std::runtime_error("Division by zero");
+    DualNumber result(lhs / rhs.value, -lhs * rhs.derivative / (rhs.value * rhs.value), rhs.tape);
+    result.tape.add([&result, &rhs, lhs]() {
+        result.derivative -= -lhs * rhs.derivative / rhs.value;
+    });
+
+    return result;
+
 }
 
-DualNumber exp(const DualNumber& X) {
-    double exp_val = std::exp(X.value);
-    return DualNumber(exp_val, 
-                      X.derivative * exp_val,
-                      (X.second_derivative * exp_val) + (X.derivative * X.derivative * exp_val));
+inline DualNumber operator-(const DualNumber& number) {
+    return DualNumber(-number.value, -number.derivative, number.tape);
 }
 
-DualNumber N(DualNumber X){
+inline DualNumber log(const DualNumber& X){
+    if (X.value <= 0.0) throw std::runtime_error("log domain error");
+    DualNumber result(log(X.value), 1.0 / X.value, X.tape);
+    result.tape.add([&result, &X]() {
+        result.derivative += X.derivative / X.value;
+    });
+
+    return result;
+}
+
+inline DualNumber sqrt(const DualNumber& X){
+    if (X.value < 0) throw std::runtime_error("sqrt domain error");
+    double sqrt_value = sqrt(X.value);
+    DualNumber result(sqrt_value, 0.5 / sqrt_value * X.derivative, X.tape);
+    result.tape.add([&result, &X, sqrt_value]() {
+        result.derivative += 0.5 * X.derivative / sqrt_value;
+    });
+
+    return result;
+}
+
+inline DualNumber exp(const DualNumber& X){
+    double exp_value = exp(X.value);
+    DualNumber result(exp_value, exp_value * X.derivative, X.tape);
+    result.tape.add([&result, &X, exp_value]() {
+        result.derivative += X.derivative * exp_value;
+    });
+
+    return result;
+}
+
+inline DualNumber N(DualNumber X){
     static const double inv_sqrt_2pi = 0.3989422804014327;
     double value = 0.5 * erfc(-X.value * M_SQRT1_2);
     double derivative = X.derivative * inv_sqrt_2pi * exp(-0.5 * X.value * X.value);
-    double second_derivative = X.second_derivative * inv_sqrt_2pi * exp(-0.5 * X.value * X.value)
-        - derivative * X.value;
+    DualNumber result(value, derivative, X.tape);
 
-    return DualNumber(value, derivative, second_derivative);
+    result.tape.add([&]() {
+        result.derivative += derivative;
+    });
+
+    return result;
 }
 
 DualNumber BS_Call(DualNumber S, DualNumber K, DualNumber T, DualNumber r, DualNumber sigma){
     DualNumber d1 = (log(S / K) + (r + 0.5 * sigma * sigma) * T) / (sigma * sqrt(T));
     DualNumber d2 = d1 - sigma * sqrt(T);
+    DualNumber y = S * N(d1) - K * exp(-r * T) * N(d2);
+    y.tape.add([&]() {
+        y.derivative += d1.derivative - d2.derivative;
+    });
 
-    return S * N(d1) - K * exp(-r * T) * N(d2);
+    return y;
 }
 
 Greeks computeGreeks(double S_val, double K_val, double T_val, double r_val, double sigma_val){
-    DualNumber S(S_val, 1.0, 0.0);
-    DualNumber K(K_val, 1.0, 0.0);
-    DualNumber T(T_val, 1.0, 0.0);
-    DualNumber r(r_val, 1.0, 0.0);
-    DualNumber sigma(sigma_val, 1.0, 0.0);
+
+    Tape tape;
+
+    DualNumber S(S_val, 1.0, tape);
+    DualNumber K(K_val, 0.0, tape);
+    DualNumber T(T_val, 0.0, tape);
+    DualNumber r(r_val, 0.0, tape);
+    DualNumber sigma(sigma_val, 0.0, tape);
 
     Greeks greeks;
-    greeks.delta = BS_Call(S, K, T, r, sigma).derivative;
 
-    S.derivative = 0.0;
-    S.second_derivative = 1.0;
-    greeks.gamma = BS_Call(S, K, T, r, sigma).second_derivative;
+    DualNumber BS_Call_result = BS_Call(S, K, T, r,sigma);
 
-    S.second_derivative = 0.0;
-    sigma.derivative = 1.0;
-    greeks.vega = BS_Call(S, K, T, r, sigma).derivative;
-
-    sigma.derivative = 0.0;
-    r.derivative = 1.0;
-    greeks.rho = BS_Call(S, K, T, r, sigma).derivative;
-
-    r.derivative = 0.0;
-    T.derivative = 1.0;
-    greeks.theta = -BS_Call(S, K, T, r, sigma).derivative;
-
-    // Compute vanna, change of delta with respect to volatility
-    T.derivative = 0.0;
-    sigma.derivative = 0.0;
+    // Delta
     S.derivative = 1.0;
-    sigma.second_derivative = 1.0;
-    greeks.vanna = BS_Call(S, K, T, r, sigma).second_derivative;
+    BS_Call_result.derivative = 0.0;
+    tape.rewind();
+    greeks.delta = BS_Call_result.derivative;
+
+    // Vega
+    sigma.derivative = 1.0;
+    BS_Call_result.derivative = 0.0;
+    tape.rewind();
+    greeks.vega = BS_Call_result.derivative;
+
+    // Rho
+    r.derivative = 1.0;
+    BS_Call_result.derivative = 0.0;
+    tape.rewind();
+    greeks.rho = BS_Call_result.derivative;
+
+    // Theta
+    T.derivative = 1.0;
+    BS_Call_result.derivative = 0.0;
+    tape.rewind();
+    greeks.theta = -BS_Call_result.derivative;
+
+    // Gamma
+    S.derivative = 1.0;
+    BS_Call_result.derivative = 0.0;
+    tape.rewind();
+    greeks.gamma = BS_Call_result.derivative;
+
+    // vanna
+    S.derivative = 1.0;
+    sigma.derivative = 1.0;
+    BS_Call_result.derivative = 0.0;
+    tape.rewind();
+    greeks.vanna = BS_Call_result.derivative;
 
     return greeks;
-
 }

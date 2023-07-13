@@ -3,46 +3,49 @@
 
 #include <iostream>
 #include <cmath>
+#include "AAD_Tape.h"
 
 class DualNumber {
     public:
         double value;
         double derivative;
-        double second_derivative;
+        Tape& tape;
 
-        DualNumber(double value, double derivative, double second_derivative);
+        DualNumber(double value, double derivative, Tape& tape);
         ~DualNumber(){
-            std::cout << "Destroying Dual Number" << std::endl;
+            //std::cout << "Destroying Dual Number" << std::endl;
         };
 
-        DualNumber operator+(const DualNumber& other);
-        DualNumber operator-(const DualNumber& other);
-        DualNumber operator*(const DualNumber& other);
-        DualNumber operator/(const DualNumber& other);
+        inline friend DualNumber operator+(const DualNumber& lhs, const DualNumber& rhs);
+        inline friend DualNumber operator-(const DualNumber& lhs, const DualNumber& rhs);
+        inline friend DualNumber operator*(const DualNumber& lhs, const DualNumber& rhs);
+        inline friend DualNumber operator/(const DualNumber& lhs, const DualNumber& rhs);
 
-        DualNumber operator+(double rhs) const;
-        DualNumber operator-(double rhs) const;
-        DualNumber operator*(double rhs) const;
-        DualNumber operator/(double rhs) const;
-        DualNumber operator-() const;
+        inline friend DualNumber operator+(const DualNumber& lhs, const double& rhs);
+        inline friend DualNumber operator-(const DualNumber& lhs, const double& rhs);
+        inline friend DualNumber operator*(const DualNumber& lhs, const double& rhs);
+        inline friend DualNumber operator/(const DualNumber& lhs, const double& rhs);
 
-        friend DualNumber operator*(double lhs, const DualNumber& rhs);
+        inline friend DualNumber operator+(const double& lhs, const DualNumber& rhs);
+        inline friend DualNumber operator-(const double& lhs, const DualNumber& rhs);
+        inline friend DualNumber operator*(const double& lhs, const DualNumber& rhs);
+        inline friend DualNumber operator/(const double& lhs, const DualNumber& rhs);
 
+        inline friend DualNumber operator-(const DualNumber& number);
+        inline friend DualNumber log(const DualNumber& X);
+        inline friend DualNumber sqrt(const DualNumber& X);
+        inline friend DualNumber exp(const DualNumber& X);
+        inline friend DualNumber N(DualNumber X);
 };
 
-DualNumber log(const DualNumber& X);
-DualNumber sqrt(const DualNumber& X);
-DualNumber exp(const DualNumber& X);
-DualNumber N(DualNumber X);
 DualNumber BS_Call(DualNumber S, DualNumber K, DualNumber T, DualNumber r, DualNumber sigma);
-
 
 struct Greeks {
     double delta;
-    double gamma;
     double vega;
     double theta;
     double rho;
+    double gamma;
     double vanna;
 };
 

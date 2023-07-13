@@ -26,7 +26,8 @@ int main(){
     // Calculate Simulation for FX rate
     // Step.2 Pricing an FX forward and FX Option using this framework
     double Strike = 1300.0;
-    std::pair<double, double> FX_result = FX_simulator.MC_Simulation(Strike);
+    int num_step = 5;
+    std::pair<double, double> FX_result = FX_simulator.MC_Simulation(Strike, num_step);
 
     // Display Results
     std::cout << "\nSimulation Result: " << FX_result.first << std::endl;
@@ -34,8 +35,8 @@ int main(){
 
     
     // Step.3 Use bump and reval to compute options on these instruments
-    std::pair<double, double> Option_result1 = FX_simulator1.MC_Simulation(Strike);
-    std::pair<double, double>Option_result2 = FX_simulator2.MC_Simulation(Strike);
+    std::pair<double, double> Option_result1 = FX_simulator1.MC_Simulation(Strike, num_step);
+    std::pair<double, double>Option_result2 = FX_simulator2.MC_Simulation(Strike, num_step);
     double delta_bump = (Option_result1.second - FX_result.second) / eps;
     double vega_bump = (Option_result2.second - FX_result.second) / eps;
 
@@ -108,11 +109,13 @@ int main(){
     std::cout << "Vega: " << vega1 << "\n";
     std::cout << "Rho: " << rho1 << "\n";
 
-    DualNumber S(spot_p, 1.0, 0.0);  // Initialize S with derivative 1 because we want to differentiate w.r.t. S
-    DualNumber K(strike_p, 0.0, 0.0);  
-    DualNumber MT(maturity, 0.0, 0.0);
-    DualNumber r(risk_neutral, 0.0, 0.0);
-    DualNumber sigma(vol, 0.0, 0.0);
+    Tape tape;
+
+    DualNumber S(spot_p, 1.0, tape); 
+    DualNumber K(strike_p, 0.0, tape);  
+    DualNumber MT(maturity, 0.0, tape);
+    DualNumber r(risk_neutral, 0.0, tape);
+    DualNumber sigma(vol, 0.0, tape);
 
     // Calculate the Black-Scholes call price
     DualNumber call_price = BS_Call(S, K, MT, r, sigma);
@@ -122,11 +125,13 @@ int main(){
     // Compute Greeks
     Greeks greeks = computeGreeks(spot_p, strike_p, maturity, risk_neutral, vol);
 
+    tape.rewind();  
+
     std::cout << "Delta: " << greeks.delta << std::endl;
-    std::cout << "Gamma: " << greeks.gamma << std::endl;
     std::cout << "Vega: " << greeks.vega << std::endl;
     std::cout << "Theta: " << greeks.theta << std::endl;
     std::cout << "Rho: " << greeks.rho << std::endl;
+    std::cout << "Gamma: " << greeks.gamma << std::endl;
     std::cout << "Vanna: " << greeks.vanna << std::endl;
 
     return 0;
