@@ -9,9 +9,11 @@ class DualNumber {
     public:
         double value;
         double derivative;
-        Tape& tape;
+        // Tape& tape
+        Tape* tape;
 
-        DualNumber(double value, double derivative, Tape& tape);
+        //DualNumber(double value, double derivative, Tape& tape);
+        DualNumber(double value, double derivative, Tape* tape);
         ~DualNumber(){
             //std::cout << "Destroying Dual Number" << std::endl;
         };

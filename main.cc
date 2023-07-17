@@ -30,8 +30,8 @@ int main(){
     std::pair<double, double> FX_result = FX_simulator.MC_Simulation(Strike, num_step);
 
     // Display Results
-    std::cout << "\nSimulation Result: " << FX_result.first << std::endl;
-    std::cout << "Simulation Result(FX Option): " << FX_result.second << std::endl;
+    //std::cout << "\nSimulation Result: " << FX_result.first << std::endl;
+    //std::cout << "Simulation Result(FX Option): " << FX_result.second << std::endl;
 
     
     // Step.3 Use bump and reval to compute options on these instruments
@@ -41,12 +41,12 @@ int main(){
     double vega_bump = (Option_result2.second - FX_result.second) / eps;
 
     // Display Results 
-    std::cout << "Simulation Result(FX Option1): " << Option_result1.second << std::endl;
-    std::cout << "Simulation Result(FX Option2): " << Option_result2.second << std::endl;
+    //std::cout << "Simulation Result(FX Option1): " << Option_result1.second << std::endl;
+    //std::cout << "Simulation Result(FX Option2): " << Option_result2.second << std::endl;
 
-    std::cout << "\n======== Sensitivities by bump and reval with (S(T0): "<< fx_initial << ", K:" << Strike << ") ========\n"; 
-    std::cout << "Simulation Result(Option_delta): " << delta_bump << std::endl;
-    std::cout << "Simulation Result(Option_vega): " << vega_bump << std::endl;
+    //std::cout << "\n======== Sensitivities by bump and reval with (S(T0): "<< fx_initial << ", K:" << Strike << ") ========\n"; 
+    //std::cout << "Simulation Result(Option_delta): " << delta_bump << std::endl;
+    //std::cout << "Simulation Result(Option_vega): " << vega_bump << std::endl;
 
 
     // Step.4 Black-Scholes Fomular for FX Option
@@ -61,10 +61,10 @@ int main(){
     double call_op = bsmodel.calculateCallOptionPrice();
     double put_op = bsmodel.calculatePutOptionPrice();
 
-    std::cout << "======== Option Price(S(T0): "<< spot_p << ", K: " << strike_p << ") ========\n";
-    std::cout << "Forward Price: " << fx_forward << "\n";
-    std::cout << "Call Option Price: " << call_op << "\n";
-    std::cout << "Put Option Price: " << put_op << "\n";
+    //std::cout << "======== Option Price(S(T0): "<< spot_p << ", K: " << strike_p << ") ========\n";
+    //std::cout << "Forward Price: " << fx_forward << "\n";
+    //std::cout << "Call Option Price: " << call_op << "\n";
+    //std::cout << "Put Option Price: " << put_op << "\n";
 
     double delta = bsmodel.calculateDelta();
     double gamma = bsmodel.calculateGamma();
@@ -72,12 +72,12 @@ int main(){
     double vega = bsmodel.calculateVega();
     double rho = bsmodel.calculateRho();
 
-    std::cout << "\n======== Sensitivities(S(T0): "<< spot_p << ", K:" << strike_p << ") ========\n";
-    std::cout << "Delta: " << delta << "\n";
-    std::cout << "Gamma: " << gamma << "\n";
-    std::cout << "Theta: " << theta << "\n";
-    std::cout << "Vega: " << vega << "\n";
-    std::cout << "Rho: " << rho << "\n";
+    //std::cout << "\n======== Sensitivities(S(T0): "<< spot_p << ", K:" << strike_p << ") ========\n";
+    //std::cout << "Delta: " << delta << "\n";
+    //std::cout << "Gamma: " << gamma << "\n";
+    //std::cout << "Theta: " << theta << "\n";
+    //std::cout << "Vega: " << vega << "\n";
+    //std::cout << "Rho: " << rho << "\n";
 
 
     double spot_p1 = 1295.0;
@@ -91,10 +91,10 @@ int main(){
     double call_op1 = bsmodel1.calculateCallOptionPrice();
     double put_op1 = bsmodel1.calculatePutOptionPrice();
 
-    std::cout << "======== Option Price(S(t0): "<< spot_p1 << ", K: " << strike_p1 << ") ========\n";
+    //std::cout << "======== Option Price(S(t0): "<< spot_p1 << ", K: " << strike_p1 << ") ========\n";
     //std::cout << "Forward Price: " << fx_forward1 << "\n";
-    std::cout << "Call Option Price: " << call_op1 << "\n";
-    std::cout << "Put Option Price: " << put_op1 << "\n";
+    //std::cout << "Call Option Price: " << call_op1 << "\n";
+    //std::cout << "Put Option Price: " << put_op1 << "\n";
 
     double delta1 = bsmodel1.calculateDelta();
     double gamma1 = bsmodel1.calculateGamma();
@@ -102,30 +102,41 @@ int main(){
     double vega1 = bsmodel1.calculateVega();
     double rho1 = bsmodel1.calculateRho();
 
-    std::cout << "\n======== Sensitivities(S(t0): "<< spot_p1 << ", K: " << strike_p1 << ") ========\n";
-    std::cout << "Delta: " << delta1 << "\n";
-    std::cout << "Gamma: " << gamma1 << "\n";
-    std::cout << "Theta: " << theta1 << "\n";
-    std::cout << "Vega: " << vega1 << "\n";
-    std::cout << "Rho: " << rho1 << "\n";
+    //std::cout << "\n======== Sensitivities(S(t0): "<< spot_p1 << ", K: " << strike_p1 << ") ========\n";
+    //std::cout << "Delta: " << delta1 << "\n";
+    //std::cout << "Gamma: " << gamma1 << "\n";
+    //std::cout << "Theta: " << theta1 << "\n";
+    //std::cout << "Vega: " << vega1 << "\n";
+    //std::cout << "Rho: " << rho1 << "\n";
 
+    std::cout << "\n======== Checking the tape is working well ========\n";
     Tape tape;
 
-    DualNumber S(spot_p, 1.0, tape); 
-    DualNumber K(strike_p, 0.0, tape);  
-    DualNumber MT(maturity, 0.0, tape);
-    DualNumber r(risk_neutral, 0.0, tape);
-    DualNumber sigma(vol, 0.0, tape);
+    tape.add([]() { std::cout << "This is the first function\n"; });
+    tape.add([]() { std::cout << "This is the second function\n"; });
+    tape.add([]() { std::cout << "This is the third function\n"; });
+    
+    tape.rewind(); 
+
+    DualNumber S(spot_p, 1.0, &tape); 
+    DualNumber K(strike_p, 0.0, &tape);  
+    DualNumber MT(maturity, 0.0, &tape);
+    DualNumber r(risk_neutral, 0.0, &tape);
+    DualNumber sigma(vol, 0.0, &tape);
 
     // Calculate the Black-Scholes call price
     DualNumber call_price = BS_Call(S, K, MT, r, sigma);
 
     std::cout << "Call price: " << call_price.value << std::endl;
 
-    // Compute Greeks
-    Greeks greeks = computeGreeks(spot_p, strike_p, maturity, risk_neutral, vol);
+    //tape.rewind();
 
-    tape.rewind();  
+    // Compute Greeks
+    std::cout << "Start Calling Greeks Function" << std::endl; 
+    Greeks greeks = computeGreeks(spot_p, strike_p, maturity, risk_neutral, vol);
+    std::cout << "Finish Computing Greeks" << std::endl; 
+
+    //tape.rewind();  
 
     std::cout << "Delta: " << greeks.delta << std::endl;
     std::cout << "Vega: " << greeks.vega << std::endl;

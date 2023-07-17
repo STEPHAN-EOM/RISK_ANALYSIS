@@ -150,13 +150,63 @@ class memorypool{
 
                     return *this;
                 }
+
+                T& operator*(){
+                    return *cur_space;
+                }
+
+                const T& operator*() const{
+                    return *cur_spae;
+                }
+
+                T* operator->(){
+                    return &*cur_space;
+                }
+
+                const T* operator->() const{
+                    return &*cur_space;
+                }
+
+                bool operator ==(const iterator& rhs) const{
+                    return (cur_block == rhs.cur_block && cur_space == rhs.cur_space);
+                }
+
+                bool operator !=(const iterator& rhs) const{
+                    return (cur_block != rhs.cur_block || cur_space == rhs.cur_space);
+                }
+
+        };
+
+        iterator begin(){
+            return iterator(data.begin(), data.begin()->begin(), data.begin()->begin(), data.begin()->end());
         }
 
+        iterator end(){
+            auto last_block = prev(data.end());
+            return iterator(cur_block, next_space, cur_block->begin(), cur_block->end());
+        }
 
+        iterator mark(){
+            return iterator(marked_block, marked_space, marked_block->begin(), marked_block->end());
+        }
 
+        iterator find(const T* const element){
+            iterator it = end();
+            iterator b = begin();
 
+             while (it != b){
+                --it;
+                if (&*it == element){
+                    return it;
+                }
+            }
 
+            if (&*it == element){
+                return it;
+            }
 
+            return end();
+        }
 };
 
 #endif  // MEMORYPOOL_H
