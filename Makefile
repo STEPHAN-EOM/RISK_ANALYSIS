@@ -3,7 +3,7 @@ CXXFLAGS = -Wall -Wextra -std=c++17
 
 SOURCE = BSModel.h MCSimulation.h AAD.h  AAD_Tape.h
 
-all: main main_bs
+all: main main_aad
 #######################################################
 MCSimulation.o: MCSimulation.cc MCSimulation.h 
 	$(CXX) $(CXXFLAGS) -o MCSimulation.o -c MCSimulation.cc
@@ -20,15 +20,15 @@ main.o: main.cc $(SOURCE)
 main: main.o BSModel.o  MCSimulation.o  AAD.o
 	$(CXX) $(CXXFLAGS) -o main main.o BSModel.o  MCSimulation.o AAD.o
 
-main_bs.o: main_bs.cc BSModel.h
-	$(CXX) $(CXXFLAGS) -o main_bs.o -c main_bs.cc 
+main_aad.o: main_aad.cc Node_v1.h Number_v1.h
+	$(CXX) $(CXXFLAGS) -o main_aad.o -c main_aad.cc 
 
-main_bs: main_bs.o
-	$(CXX) $(CXXFLAGS) -o main_bs main_bs.o BSModel.o
+main_aad: main_aad.o
+	$(CXX) $(CXXFLAGS) -o main_aad main_aad.o
 
 #######################################################
 .Phony: all clean
 
 clean:
-	rm -f *.o main main_bs
+	rm -f *.o main main_aad
 

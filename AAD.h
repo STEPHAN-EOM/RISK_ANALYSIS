@@ -51,6 +51,6 @@ struct Greeks {
     double vanna;
 };
 
-Greeks computeGreeks(double S_val, double K_val, double T_val, double r_val, double sigma_val);
+Greeks computeGreeks(double S_val, double K_val, double T_val, double r_val, double sigma_val, Tape tape);
 
 #endif  // AAD_H

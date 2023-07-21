@@ -9,18 +9,27 @@
 
 class Tape{
     public:
+
+        Tape(){
+            std::cout << "Constructing the Tape" << std::endl;
+        };
+
+        ~Tape(){
+            std::cout << "Destroying the Tape" << std::endl;
+        };
+
         struct TapeEntry{
             std::function<void ()> f;
 
 
             TapeEntry(std::function<void ()> f)
                 : f(f){
-                    std::cout << "Constructing the Tape" << std::endl;
+                    std::cout << "Constructing the Tap Entry" << std::endl;
                 };
         };
 
        
-        static constexpr int MaxTapeSize = 300000;
+        static constexpr int MaxTapeSize = 50;
         std::array<std::list<TapeEntry>, MaxTapeSize> tape;
         
         
@@ -47,6 +56,7 @@ class Tape{
             } else {
                 throw std::runtime_error("Tape size limit exceeded.");
             }
+            std::cout << "Current Tape size " << tapeSize() << std::endl;
         }
 
         void rewind() {
@@ -56,15 +66,9 @@ class Tape{
             std::cout << "Rewinding the Tape" << std::endl;
             std::cout << "Tape size = " << tapeSize() << std::endl;
             for (int i = tapeSize() - 1; i >= 0; --i) {
-                /*
-                for (const auto& entry : tape[i]) {
-                    entry.f();
-                */
-               //std::cout << "First for statement" << std::endl;
+                std::cout << "Tape size which is rewinded " << i << std::endl;
                 for (auto it = tape[i].rbegin(); it != tape[i].rend(); ++it) {
-                    //std::cout << "Second for statement" << std::endl;
-                    it->f();
-
+                    it->f();  
                 }
             }
             std::cout << "Rewinding(Itr) is done" << std::endl;

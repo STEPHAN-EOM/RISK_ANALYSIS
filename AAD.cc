@@ -177,14 +177,15 @@ DualNumber BS_Call(DualNumber S, DualNumber K, DualNumber T, DualNumber r, DualN
         y.derivative += d1.derivative - d2.derivative;
     });
 
+    std::cout << "Finished BS Call" << std::endl;
     return y;
 }
 
-Greeks computeGreeks(double S_val, double K_val, double T_val, double r_val, double sigma_val){
+Greeks computeGreeks(double S_val, double K_val, double T_val, double r_val, double sigma_val, Tape tape){
 
     std::cout << "Start Computing Greeks" << std::endl; 
-    Tape tape;
-    std::cout << "Declared the Tape" << std::endl; 
+    //Tape tape;
+    std::cout << "Declared the Tape for Computing Greeks" << std::endl; 
 
     DualNumber S(S_val, 1.0, &tape);
     DualNumber K(K_val, 0.0, &tape);
@@ -205,8 +206,9 @@ Greeks computeGreeks(double S_val, double K_val, double T_val, double r_val, dou
     S.derivative = 1.0;
     BS_Call_result.derivative = 0.0;
     std::cout << "Delta Step.2" << std::endl;
-    tape.rewind();
     std::cout << "Dealta Tape Rewinding" << std::endl;
+    tape.rewind();
+    std::cout << "Dealta Tape is rewinded" << std::endl;
     greeks.delta = BS_Call_result.derivative;
     std::cout << "Calculate delta" << std::endl;
 
