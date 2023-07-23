@@ -76,8 +76,43 @@ Number operator*(Number lhs, Number rhs){
     return n;
 }
 
+Number operator/(Number lhs, Number rhs){
+    Node*n = new DivNode(lhs.node(), rhs.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
+
+    return n;
+}
+
+Number operator-(Number arg){
+    Node* n = new MinusNode(arg.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
+
+    return n;
+}
+
 Number log(Number arg){
     Node* n = new LogNode(arg.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
+
+    return n;
+}
+
+Number exp(Number arg){
+    Node* n = new ExpNode(arg.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
+
+    return n;
+}
+
+Number sqrt(Number arg){
+    Node* n = new SqrtNode(arg.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
+
+    return n;
+}
+
+Number N(Number arg){
+    Node* n = new NormalNode(arg.node());
     Number::tape.push_back(std::unique_ptr<Node>(n));
 
     return n;

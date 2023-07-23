@@ -72,38 +72,147 @@ class MulNode : public Node{
 
             result = lhs->Get_result() * rhs->Get_result();
 
-            std::cout << "Constructing class for time nodes" << std::endl;
+            std::cout << "Constructing class for Multiplying Nodes" << std::endl;
         };
 
         ~MulNode(){
-            std::cout << "Destroying class for time nodes" << std::endl;
+            std::cout << "Destroying class for Multiplying Nodes" << std::endl;
         };
 
 
         void Propagate_adj() override{
-            arguments[0] -> Get_adjoint() += adjoint * arguments[1] -> Get_result();
-            arguments[1] -> Get_adjoint() += adjoint * arguments[0] -> Get_result();
+            arguments[0] -> Get_adjoint() += adjoint * (arguments[1] -> Get_result());
+            arguments[1] -> Get_adjoint() += adjoint * (arguments[0] -> Get_result());
         }
 };
+
+class DivNode : public Node{
+    public:
+        DivNode(Node* lhs, Node* rhs){
+            arguments.resize(2);
+            arguments[0] = lhs;
+            arguments[1] = rhs;
+
+            result = lhs->Get_result() / rhs->Get_result();
+
+            std::cout << "Constructing class for Dividing Nodes" << std::endl;
+        };
+
+        ~DivNode(){
+            std::cout << "Destroying class for Dividing Nodes" << std::endl;
+        };
+
+
+        void Propagate_adj() override{
+            arguments[0] -> Get_adjoint() += adjoint / (arguments[1] -> Get_result());
+            arguments[1] -> Get_adjoint() += (-1)* (adjoint * (arguments[0] -> Get_result())) / ((arguments[1] -> Get_result()) * (arguments[1] -> Get_result()));
+        }
+};
+
+class MinusNode : public Node{
+    public:
+        MinusNode(Node* arg){
+            arguments.resize(1);
+            arguments[0] = arg;
+
+            result = (-1) * (arg->Get_result());
+
+            std::cout << "Constructing class for Minus Nodes" << std::endl;
+        };
+
+        ~MinusNode(){
+            std::cout << "Destroying class for Minus Nodes" << std::endl;
+        };
+
+
+        void Propagate_adj() override{
+            arguments[0] -> Get_adjoint() += (-1) * adjoint;  
+        }
+};
+
 
 class LogNode : public Node{
     public:
         LogNode(Node* arg){
-            arguments.reserve(1);
+            arguments.resize(1);
             arguments[0] = arg;
 
             result = log(arg->Get_result());
 
-            std::cout << "Constructing class for log nodes" << std::endl;
+            std::cout << "Constructing class for Log Nodes" << std::endl;
         };
 
         ~LogNode(){
-            std::cout << "Destroying class for log Nodes" << std::endl;
+            std::cout << "Destroying class for Log Nodes" << std::endl;
         };
 
         void Propagate_adj() override{
-                arguments[0] -> Get_adjoint() += adjoint / arguments[0] -> Get_result();
+                arguments[0] -> Get_adjoint() += adjoint / (arguments[0] -> Get_result());
             }
+};
+
+class ExpNode : public Node{
+    public:
+        ExpNode(Node* arg){
+            arguments.resize(1);
+            arguments[0] = arg;
+
+            result = exp(arg->Get_result());
+
+            std::cout << "Constructing class for Exp Nodes" << std::endl;
+        };
+
+        ~ExpNode(){
+            std::cout << "Destroying class for Exp Nodes" << std::endl;
+        }
+
+        void Propagate_adj() override{
+            arguments[0] -> Get_adjoint() += adjoint * exp(arguments[0] -> Get_result());
+        }
+};
+
+class SqrtNode : public Node{
+     public:
+        SqrtNode(Node* arg){
+            arguments.resize(1);
+            arguments[0] = arg;
+
+            result = sqrt(arg->Get_result());
+
+            std::cout << "Constructing class for Sqrt Nodes" << std::endl;
+        };
+
+        ~SqrtNode(){
+            std::cout << "Destroying class for Sqrt Nodes" << std::endl;
+        }
+
+        void Propagate_adj() override{
+            arguments[0] -> Get_adjoint() += (1/2) * adjoint / sqrt(arguments[0] -> Get_result());
+        }
+
+};
+
+class NormalNode : public Node{
+     public:
+        NormalNode(Node* arg){
+            arguments.resize(1);
+            arguments[0] = arg;
+            
+            result = 0.5 * erfc(-1 * arg->Get_result() * M_SQRT1_2);
+
+            std::cout << "Constructing class for Normal Nodes" << std::endl;
+        };
+
+        ~NormalNode(){
+            std::cout << "Destroying class for Normal Nodes" << std::endl;
+        }
+
+
+        void Propagate_adj() override{
+            static const double inv_sqrt_2pi = 0.3989422804014327;
+            arguments[0] -> Get_adjoint() += adjoint * inv_sqrt_2pi * exp(-0.5 * result * result);
+        }
+
 };
 
 class Leaf : public Node{

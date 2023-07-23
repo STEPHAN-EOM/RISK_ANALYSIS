@@ -66,7 +66,7 @@ class Tape{
             std::cout << "Rewinding the Tape" << std::endl;
             std::cout << "Tape size = " << tapeSize() << std::endl;
             for (int i = tapeSize() - 1; i >= 0; --i) {
-                std::cout << "Tape size which is rewinded " << i << std::endl;
+                std::cout << "Tape size which is rewinded -> " << i << std::endl;
                 for (auto it = tape[i].rbegin(); it != tape[i].rend(); ++it) {
                     it->f();  
                 }
