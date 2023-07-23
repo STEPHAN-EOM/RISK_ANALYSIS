@@ -84,7 +84,7 @@ double BSModel::calculateRho() const {
 
 double BSModel::calculateOptionPrice(double d1, double d2) const {
     double OptionPrice =
-        spotPrice * std::exp(-riskFreeRate * timeToMaturity) * normcdf(d1) - strikePrice * std::exp(-riskFreeRate * timeToMaturity) * normcdf(d2);
+        spotPrice * normcdf(d1) - strikePrice * std::exp(-riskFreeRate * timeToMaturity) * normcdf(d2);
     
     //std::cout << "Progress: BS_CalOP" << std::endl;
     return OptionPrice;

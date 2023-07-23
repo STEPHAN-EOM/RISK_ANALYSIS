@@ -26,11 +26,20 @@ int main(){
 
     BS_Call.Propagate_adj();
 
+    std::cout << "Delta_Derivative with respect to spot price: " << initial[0].Get_adjoint() << std::endl;
+    std::cout << "Rho_Derivative with respect to risk-free rate: " << initial[2].Get_adjoint() << std::endl;
+    std::cout << "Vega_Derivative with respect to volatility(): " << initial[3].Get_adjoint() << std::endl;
+    std::cout << "Theta_Derivative with respect to maturity: " << initial[4].Get_adjoint() << std::endl;
 
-    for (size_t i = 0; i < 5; ++i){
-        std::cout << "a" << i << " = " << initial[i].Get_adjoint() << std::endl;
+    int t = Number::tape.size();
+
+    std::cout << "========== Print out the values saved onto the tape(whose size = " << t << ") ==========" << std::endl;
+
+    for (auto i = 0; i < t; ++i){
+        std::cout << "tape(" << i << ") = " << Number::tape[i]->Get_result() << std::endl;
     }
     
+
 
     return 0;
 }

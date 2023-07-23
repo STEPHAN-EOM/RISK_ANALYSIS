@@ -23,7 +23,7 @@ class Node {
             std::cout << "Destroying the Node" << std::endl;
         };
 
-      double Get_result(){
+        double Get_result(){
             return result;
         }
 
@@ -50,6 +50,7 @@ class AddNode : public Node{
             result = lhs->Get_result() + rhs->Get_result();
 
             std::cout << "Constructing class for Adding Nodes" << std::endl;
+            std::cout << lhs->Get_result() << " + " << rhs->Get_result() << " = " << result << std::endl;
         };
 
         ~AddNode(){
@@ -73,6 +74,7 @@ class MulNode : public Node{
             result = lhs->Get_result() * rhs->Get_result();
 
             std::cout << "Constructing class for Multiplying Nodes" << std::endl;
+            std::cout << lhs->Get_result() << " * " << rhs->Get_result() << " = " << result << std::endl;
         };
 
         ~MulNode(){
@@ -96,6 +98,7 @@ class DivNode : public Node{
             result = lhs->Get_result() / rhs->Get_result();
 
             std::cout << "Constructing class for Dividing Nodes" << std::endl;
+            std::cout << lhs->Get_result() << " / " << rhs->Get_result() << " = " << result << std::endl;
         };
 
         ~DivNode(){
@@ -118,6 +121,7 @@ class MinusNode : public Node{
             result = (-1) * (arg->Get_result());
 
             std::cout << "Constructing class for Minus Nodes" << std::endl;
+            std::cout << arg->Get_result() << " * 1 = " << result << std::endl;
         };
 
         ~MinusNode(){
@@ -140,6 +144,7 @@ class LogNode : public Node{
             result = log(arg->Get_result());
 
             std::cout << "Constructing class for Log Nodes" << std::endl;
+            std::cout << "log(" <<arg->Get_result() << ") =  " << result << std::endl;
         };
 
         ~LogNode(){
@@ -160,6 +165,7 @@ class ExpNode : public Node{
             result = exp(arg->Get_result());
 
             std::cout << "Constructing class for Exp Nodes" << std::endl;
+            std::cout << "exp(" <<arg->Get_result() << ") =  " << result << std::endl;
         };
 
         ~ExpNode(){
@@ -180,6 +186,7 @@ class SqrtNode : public Node{
             result = sqrt(arg->Get_result());
 
             std::cout << "Constructing class for Sqrt Nodes" << std::endl;
+            std::cout << "sqrt(" <<arg->Get_result() << ") =  " << result << std::endl;
         };
 
         ~SqrtNode(){
@@ -201,6 +208,7 @@ class NormalNode : public Node{
             result = 0.5 * erfc(-1 * arg->Get_result() * M_SQRT1_2);
 
             std::cout << "Constructing class for Normal Nodes" << std::endl;
+            std::cout << "Normal(" <<arg->Get_result() << ") =  " << result << std::endl;
         };
 
         ~NormalNode(){
@@ -220,6 +228,7 @@ class Leaf : public Node{
         Leaf(double value){
             result = value;
             std::cout << "Constructing class for Leaves" << std::endl;
+            std::cout << "Leaf = " << result << std::endl;
         };
 
         ~Leaf(){

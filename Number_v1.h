@@ -58,6 +58,8 @@ class Number{
                 ++it;
             }
         }
+
+        
 };
 
 std::vector<std::unique_ptr<Node>> Number::tape;
