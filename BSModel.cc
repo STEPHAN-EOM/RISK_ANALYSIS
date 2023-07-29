@@ -57,21 +57,25 @@ double BSModel::calculateTheta() const {
                 (volatility * std::sqrt(timeToMaturity));
     double d2 = d1 - volatility * std::sqrt(timeToMaturity);
 
-    double term1 = -spotPrice * volatility * std::exp(-riskFreeRate * timeToMaturity) * normcdf(d1) / (2.0 * std::sqrt(timeToMaturity));
+    // N'(t) = exp(-0.5 * t * t) / sqrt(2.0 * pi)
+    double pdf = std::exp(-0.5 * d1 * d1) / std::sqrt(2.0 * M_PI);
+
+    double term1 = spotPrice * volatility  * pdf / (2.0 * std::sqrt(timeToMaturity));
     double term2 = riskFreeRate * strikePrice * std::exp(-riskFreeRate * timeToMaturity) * normcdf(d2);
 
     //std::cout << "Progress: BS_CalTheta" << std::endl;
-    return term1 - term2;
+    return -(term1 + term2);
 }
 
 double BSModel::calculateVega() const {
     double d1 = (std::log(spotPrice / strikePrice) + (riskFreeRate + 0.5 * volatility * volatility) * timeToMaturity) /
                 (volatility * std::sqrt(timeToMaturity));
 
+    // N'(t) = exp(-0.5 * t * t) / sqrt(2.0 * pi)
     double pdf = std::exp(-0.5 * d1 * d1) / std::sqrt(2.0 * M_PI);
 
     //std::cout << "Progress: BS_CalVega" << std::endl;
-    return spotPrice * std::exp(-riskFreeRate * timeToMaturity) * pdf * std::sqrt(timeToMaturity);
+    return spotPrice * std::sqrt(timeToMaturity) * pdf;
 }
 
 double BSModel::calculateRho() const {

@@ -218,7 +218,6 @@ class NormalNode : public Node{
 
         void Propagate_adj() override{
             static const double inv_sqrt_2pi = 0.3989422804014327;
-            //arguments[0] -> Get_adjoint() += adjoint * inv_sqrt_2pi * exp(-0.5 * result * result);
             arguments[0] -> Get_adjoint() += adjoint * inv_sqrt_2pi 
                                              * exp(-0.5 * arguments[0]->Get_result() * arguments[0]->Get_result());
         }
