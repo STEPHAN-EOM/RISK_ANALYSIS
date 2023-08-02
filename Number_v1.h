@@ -17,15 +17,15 @@ class Number{
         Number(double value) : mynode(new Leaf(value)) {
             tape.push_back(std::unique_ptr<Node>(mynode));
 
-            std::cout << "Constructing class for Number with Leaf" << std::endl;
+            //std::cout << "Constructing class for Number with Leaf" << std::endl;
         };
 
         Number(Node* node) : mynode(node) {
-            std::cout << "Constructing class for Number with Node" << std::endl;
+            //std::cout << "Constructing class for Number with Node" << std::endl;
         };
 
         ~Number(){
-            std::cout << "Destroying class for Numbers" << std::endl;
+            //std::cout << "Destroying class for Numbers" << std::endl;
         };
 
         Node* node(){
@@ -36,7 +36,7 @@ class Number{
             dynamic_cast<Leaf*>(mynode) -> Set_value(value);
         }
 
-        double Get_value(){
+        double Get_value() {
             return dynamic_cast<Leaf*>(mynode) -> Get_value();
         }
 
@@ -120,4 +120,24 @@ Number N(Number arg){
     return n;
 }
 
+Number max(Number lhs, Number rhs) {
+    Node* n = new MaxNode(lhs.node(), rhs.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
+
+    return n;
+}
+
+Number& operator+=(Number& lhs, Number rhs) {
+    Node* n = new AddNode(lhs.node(), rhs.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
+    lhs = n;
+    return lhs;
+}
+
+Number& operator*=(Number& lhs, Number rhs) {
+    Node* n = new MulNode(lhs.node(), rhs.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
+    lhs = n;
+    return lhs;
+}
 #endif // NUMBER_V1_H
