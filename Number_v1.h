@@ -71,6 +71,13 @@ Number operator+(Number lhs, Number rhs){
     return n;
 }
 
+Number operator-(Number lhs, Number rhs){
+    Node* n = new SubNode(lhs.node(), rhs.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
+
+    return n;
+}
+
 Number operator*(Number lhs, Number rhs){
     Node* n = new MulNode(lhs.node(), rhs.node());
     Number::tape.push_back(std::unique_ptr<Node>(n));
@@ -78,8 +85,22 @@ Number operator*(Number lhs, Number rhs){
     return n;
 }
 
+Number operator*(Number lhs, double rhs){
+    Node* n = new MulDoubleNode(lhs.node(), rhs);
+    Number::tape.push_back(std::unique_ptr<Node>(n));
+
+    return n;
+}
+
 Number operator/(Number lhs, Number rhs){
     Node*n = new DivNode(lhs.node(), rhs.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
+
+    return n;
+}
+
+Number operator/(Number lhs, double rhs){
+    Node*n = new DivDoubleNode(lhs.node(), rhs);
     Number::tape.push_back(std::unique_ptr<Node>(n));
 
     return n;

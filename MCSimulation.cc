@@ -9,7 +9,7 @@ MCSimulation::MCSimulation(double fx_initial, double fx_vol, double r_dom, doubl
         
 //std::pair<double, double> MCSimulation::MC_Simulation(double K)
 std::pair<double, double> MCSimulation::MC_Simulation(double K, int num_step){
-    
+
     // Initialise elementary parameters for the simulation
     //double dt = maturity / 365.0;
     double dt = maturity / (365.0 * num_step);

@@ -68,6 +68,30 @@ class AddNode : public Node{
 
 };
 
+class SubNode : public Node{
+    public:
+        SubNode(Node* lhs, Node* rhs){
+            arguments.resize(2);
+            arguments[0] = lhs;
+            arguments[1] = rhs;
+
+            result = lhs->Get_result() - rhs->Get_result();
+
+            //std::cout << "Constructing class for Subtracting Nodes" << std::endl;
+            //std::cout << lhs->Get_result() << " - " << rhs->Get_result() << " = " << result << std::endl;
+        };
+
+        ~SubNode(){
+            //std::cout << "Destroying class for Adding Nodes" << std::endl;
+        };
+
+        void Propagate_adj() override{
+            arguments[0] -> Get_adjoint() += adjoint;
+            arguments[1] -> Get_adjoint() -= adjoint;
+        }
+
+};
+
 class MulNode : public Node{
     public:
         MulNode(Node* lhs, Node* rhs){
@@ -92,6 +116,31 @@ class MulNode : public Node{
         }
 };
 
+class MulDoubleNode : public Node{
+    double multiplier;
+
+    public:
+        MulDoubleNode(Node* lhs, double rhs){
+            arguments.resize(1);
+            arguments[0] = lhs;
+            multiplier = rhs;
+
+            result = lhs->Get_result() * multiplier;
+
+            //std::cout << "Constructing class for Multiplying by Double Nodes" << std::endl;
+            //std::cout << lhs->Get_result() << " * " << multiplier << " = " << result << std::endl;
+        };
+
+        ~MulDoubleNode(){
+            //std::cout << "Destroying class for Multiplying Nodes" << std::endl;
+        };
+
+
+        void Propagate_adj() override{
+            arguments[0] -> Get_adjoint() += adjoint * multiplier;
+        }
+};
+
 class DivNode : public Node{
     public:
         DivNode(Node* lhs, Node* rhs){
@@ -113,6 +162,31 @@ class DivNode : public Node{
         void Propagate_adj() override{
             arguments[0] -> Get_adjoint() += adjoint / (arguments[1] -> Get_result());
             arguments[1] -> Get_adjoint() += (-1)* (adjoint * (arguments[0] -> Get_result())) / ((arguments[1] -> Get_result()) * (arguments[1] -> Get_result()));
+        }
+};
+
+class DivDoubleNode : public Node{
+    double divisor;
+
+    public:
+        DivDoubleNode(Node* lhs, double rhs){
+            arguments.resize(1);
+            arguments[0] = lhs;
+            divisor = rhs;
+
+            result = lhs->Get_result() / divisor;
+
+            //std::cout << "Constructing class for Dividing by Double Nodes" << std::endl;
+            //std::cout << lhs->Get_result() << " / " << divisor << " = " << result << std::endl;
+        };
+
+        ~DivDoubleNode(){
+            //std::cout << "Destroying class for Dividing by Double Nodes" << std::endl;
+        };
+
+
+        void Propagate_adj() override{
+            arguments[0] -> Get_adjoint() += adjoint / divisor;
         }
 };
 

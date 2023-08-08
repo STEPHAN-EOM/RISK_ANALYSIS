@@ -5,9 +5,11 @@ template <class T>
 T f(T spot_p, T strike_p, T risk_neutral, T vol, T maturity){
     
     auto d1 = (log(spot_p / strike_p) + (risk_neutral + 0.5 * vol * vol) * maturity) / (vol * sqrt(maturity)); 
-    auto d2 = d1 + (-vol) * sqrt(maturity);
+    //auto d2 = d1 + (-vol) * sqrt(maturity);
+    auto d2 = d1 -vol * sqrt(maturity);
 
-    auto y = spot_p * N(d1) + (-strike_p) * exp((-risk_neutral) * maturity) * N(d2);    
+    //auto y = spot_p * N(d1) + (-strike_p) * exp((-risk_neutral) * maturity) * N(d2);    
+    auto y = spot_p * N(d1) -strike_p * exp((-risk_neutral) * maturity) * N(d2);    
 
     return y;
 }
