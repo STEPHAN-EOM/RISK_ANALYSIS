@@ -14,7 +14,7 @@ class BSModel {
 public:
     BSModel(double spotPrice, double strikePrice, double riskFreeRate, double volatility, double timeToMaturity);
     ~BSModel(){
-        std::cout << "Destroying BSModel" << "\n";
+        //std::cout << "Destroying BSModel" << "\n";
     };
 
     double calculateFXForward() const;

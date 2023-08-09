@@ -161,4 +161,5 @@ Number& operator*=(Number& lhs, Number rhs) {
     lhs = n;
     return lhs;
 }
+
 #endif // NUMBER_V1_H

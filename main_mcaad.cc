@@ -3,6 +3,7 @@
 #include <functional>
 #include <algorithm>
 #include <utility>
+#include <chrono>
 #include "Number_v1.h"
 //#include "MCSimulation_aad.h"
 
@@ -60,15 +61,27 @@ int main(){
     Number risk_neutral = r_foreign -r_dom;
     Number vol = 0.15;
     Number maturity = 1.0;
-    int num_sim = 100000;
+    int num_sim = 120000;
     int num_step = 5;
 
+    auto start = std::chrono::high_resolution_clock::now();
     // Templated function for the Black-Scholes Fomula
     Number MC_Simulation = f(spot_p, strike_p, r_dom, risk_neutral, vol, maturity, num_sim, num_step);
-    //double MC_Simulation = f(spot_p, strike_p, r_dom, risk_neutral, vol, maturity, num_sim, num_step);
-
+    
     // Implement the Adjoint Differentiation
     MC_Simulation.Propagate_adj();
+    
+    auto end = std::chrono::high_resolution_clock::now();
+
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    std::cout << "Time taken by code: " << duration << " milliseconds" << std::endl;
+
+    // Templated function for the Black-Scholes Fomula
+    //MCSimulation<Number> Cal_Sensitivities(spot_p, r_dom, risk_neutral, vol, maturity, num_sim);
+    //Number result = Cal_Sensitivities.MC_Simulation(strike_p, num_step);
+
+    // Implement the Adjoint Differentiation
+    //result.Propagate_adj();
 
     // Print out the result of AAD
     std::cout << "\n========== Print out the result of AAD(The Greek Letters) ==========" << std::endl;
@@ -84,11 +97,11 @@ int main(){
     // Print out the values recorded on the tape
     std::cout << "\n========== Print out the values saved onto the tape(whose size = " << t << ") ==========" << std::endl;
     std::cout << "Result is " << Number::tape[t-1]->Get_result() << std::endl;
-
+/*
     for (auto i = 0; i < 30; ++i){
         std::cout << "tape(" << i << ") = " << Number::tape[i]->Get_result() << std::endl;
     }
-
+*/
 
 
     return 0;

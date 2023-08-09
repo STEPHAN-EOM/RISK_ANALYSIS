@@ -8,7 +8,7 @@ BSModel::BSModel(double spotPrice, double strikePrice, double riskFreeRate, doub
       riskFreeRate(riskFreeRate),
       volatility(volatility),
       timeToMaturity(timeToMaturity) {
-        std::cout << "\nConstructing BSModel for S(t0): " << spotPrice << " , K: " << strikePrice << std::endl;
+        //std::cout << "\nConstructing BSModel for S(t0): " << spotPrice << " , K: " << strikePrice << std::endl;
       };
 
 double BSModel::calculateFXForward() const {
