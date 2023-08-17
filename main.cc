@@ -15,7 +15,7 @@ int main(){
     double r_dom = 0.035;		    // Domestic interest rate (Korea, 8-June-2023)
     double r_foreign = 0.0525; 	    // Foreign interest rate(USA, 8-June-2023)
 
-    int num_sims = 100000;          // Number of Simulations
+    int num_sims = 1000000;          // Number of Simulations
     double T = 1.0;                 // Maturity(Year)
     double eps = 0.001;             // Epsilon
     
@@ -43,10 +43,12 @@ int main(){
     std::pair<double, double> Option_result2 = FX_simulator2.MC_Simulation(Strike, num_step);
     std::pair<double, double> Option_result3 = FX_simulator3.MC_Simulation(Strike, num_step);
     std::pair<double, double> Option_result4 = FX_simulator4.MC_Simulation(Strike, num_step);
+    std::pair<double, double> Option_result5 = FX_simulator1.MC_Simulation(Strike + eps, num_step);
     double delta_bump = (Option_result1.second - FX_result.second) / eps;
     double vega_bump = (Option_result2.second - FX_result.second) / eps;
     double rho_bump = (Option_result3.second - FX_result.second) / eps;
     double theta_bump = (Option_result4.second - FX_result.second) / eps;
+    double strike_bump = (Option_result5.second - Option_result1.second) / eps;
 
     auto end = std::chrono::high_resolution_clock::now();
 
@@ -61,8 +63,9 @@ int main(){
     std::cout << "Simulation Result(Option_vega): " << vega_bump << std::endl;
     std::cout << "Simulation Result(Option_rho): " << rho_bump << std::endl;
     std::cout << "Simulation Result(Option_theta): " << theta_bump << std::endl;
+    std::cout << "Simulation Result(Option_wrt Strike Price): " << strike_bump << std::endl;
 
-    std::cout << "\nTime taken by MC Simulation for 4 sensitivities: " << duration << " milliseconds" << std::endl;
+    std::cout << "\nTime taken by MC Simulation for 5 sensitivities: " << duration << " milliseconds" << std::endl;
 
     // Step.4 Black-Scholes Fomular for FX Option
     double spot_p = 1295.0;

@@ -8,7 +8,7 @@
 //#include "MCSimulation_aad.h"
 
 template <class T>
-T f(T spot_p, T strike_p, T r_dom, T risk_neutral, T vol, T maturity, int num_sim, int num_step){
+T f(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, double r_dom, int num_sim, int num_step){
     std::default_random_engine generator;
     std::normal_distribution<double> distribution(0.0, 1.0);
 
@@ -70,17 +70,18 @@ int main(){
     // Declare the initial parameters as Number
     Number spot_p = 1295.0;
     Number strike_p = 1300.0;
-    Number r_dom = 0.035;		                // Domestic interest rate (Korea, 8-June-2023)
-    Number r_foreign = 0.0525; 	                // Foreign interest rate(USA, 8-June-2023)
-    Number risk_neutral = r_foreign -r_dom;
+    //Number r_dom = 0.035;		                // Domestic interest rate (Korea, 8-June-2023)
+    //Number r_foreign = 0.0525; 	                // Foreign interest rate(USA, 8-June-2023)
+    Number risk_neutral = 0.0525 - 0.035;           // r_foreign -r_dom;
     Number vol = 0.15;
     Number maturity = 1.0;
-    int num_sim = 10000;
+    double r_dom = 0.035;
+    int num_sim = 100000;
     int num_step = 5;
 
     auto start = std::chrono::high_resolution_clock::now();
     // Templated function for the Black-Scholes Fomula
-    Number MC_Simulation = f(spot_p, strike_p, r_dom, risk_neutral, vol, maturity, num_sim, num_step);
+    Number MC_Simulation = f(spot_p, strike_p, risk_neutral, vol, maturity, r_dom, num_sim, num_step);
 
     // Implement the Adjoint Differentiation
     MC_Simulation.Propagate_adj();
