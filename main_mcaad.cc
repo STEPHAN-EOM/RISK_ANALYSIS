@@ -44,6 +44,20 @@ T f(T spot_p, T strike_p, T r_dom, T risk_neutral, T vol, T maturity, int num_si
     //T result_fx = average_fx * discount;
     T result_op = average_op * discount;
 
+/*
+    // Second Version of back-propagation
+    result_op.Propagate_adj();
+
+    // Mark the tape after adjoint initialization
+    Number::Mark_tape();
+
+    const int repeat_count = 10; 
+    for (int i = 0; i < repeat_count; ++i) {
+        Number::Rewind_Mark();
+        result_op.Propagate_adj();
+    }
+*/
+
     // Record the intermediate results in the local tape
     //Number::tape.push_back(std::make_unique<Leaf>(result_fx.Get_value()));
     //Number::tape.push_back(std::make_unique<Leaf>(result_op.Get_value()));
@@ -61,20 +75,33 @@ int main(){
     Number risk_neutral = r_foreign -r_dom;
     Number vol = 0.15;
     Number maturity = 1.0;
-    int num_sim = 120000;
+    int num_sim = 10000;
     int num_step = 5;
 
     auto start = std::chrono::high_resolution_clock::now();
     // Templated function for the Black-Scholes Fomula
     Number MC_Simulation = f(spot_p, strike_p, r_dom, risk_neutral, vol, maturity, num_sim, num_step);
-    
+
     // Implement the Adjoint Differentiation
     MC_Simulation.Propagate_adj();
-    
+
+
+    Number::Mark_tape();
+
+    const int repeat_count = 9; // or whatever number of repetitions you need
+
+    for (int i = 0; i < repeat_count; ++i) {
+        // Rewind the tape to the state just after adjoint initialization
+        Number::Rewind_Mark();
+
+        // Execute back-propagation
+        MC_Simulation.Propagate_adj();    
+    }
+
     auto end = std::chrono::high_resolution_clock::now();
 
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    std::cout << "Time taken by code: " << duration << " milliseconds" << std::endl;
+    std::cout << "Time taken by MC Simulation with AAD: " << duration << " milliseconds" << std::endl;
 
     // Templated function for the Black-Scholes Fomula
     //MCSimulation<Number> Cal_Sensitivities(spot_p, r_dom, risk_neutral, vol, maturity, num_sim);

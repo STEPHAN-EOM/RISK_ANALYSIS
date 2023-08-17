@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <optional>
 #include "Node_v1.h"
 
 class Number{
@@ -59,10 +60,26 @@ class Number{
             }
         }
 
+        static void Mark_tape(){
+            tapeMark = tape.size();
+        }
+
+        static void Rewind_Mark(){
+            if(tapeMark.has_value()){
+                //tape.erase(tape.begin() + tapeMark.value(), tape.end());
+                tape.resize(tapeMark.value());
+                tapeMark.reset();
+            }
+        }
+
+    private:
+    
+        static std::optional<size_t> tapeMark;
         
 };
 
 std::vector<std::unique_ptr<Node>> Number::tape;
+std::optional<size_t> Number::tapeMark = std::nullopt;
 
 Number operator+(Number lhs, Number rhs){
     Node* n = new AddNode(lhs.node(), rhs.node());

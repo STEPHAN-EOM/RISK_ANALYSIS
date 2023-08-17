@@ -62,7 +62,7 @@ int main(){
     std::cout << "Simulation Result(Option_rho): " << rho_bump << std::endl;
     std::cout << "Simulation Result(Option_theta): " << theta_bump << std::endl;
 
-    std::cout << "\nTime taken by code: " << duration << " milliseconds" << std::endl;
+    std::cout << "\nTime taken by MC Simulation for 4 sensitivities: " << duration << " milliseconds" << std::endl;
 
     // Step.4 Black-Scholes Fomular for FX Option
     double spot_p = 1295.0;
@@ -76,7 +76,7 @@ int main(){
     double call_op = bsmodel.calculateCallOptionPrice();
     double put_op = bsmodel.calculatePutOptionPrice();
 
-    std::cout << "======== Option Price(S(T0): "<< spot_p << ", K: " << strike_p << ") ========\n";
+    std::cout << "\n======== Option Price(S(T0): "<< spot_p << ", K: " << strike_p << ") ========\n";
     std::cout << "Forward Price: " << fx_forward << "\n";
     std::cout << "Call Option Price: " << call_op << "\n";
     std::cout << "Put Option Price: " << put_op << "\n";
