@@ -3,7 +3,7 @@ CXXFLAGS = -Wall -Wextra -std=c++17
 
 SOURCE = BSModel.h MCSimulation.h AAD.h  AAD_Tape.h
 
-all: main main_aad main_mcaad main_pthread
+all: main main_aad main_mcaad main_pthread main_mcaad_pthread
 #######################################################
 MCSimulation.o: MCSimulation.cc MCSimulation.h 
 	$(CXX) $(CXXFLAGS) -o MCSimulation.o -c MCSimulation.cc
@@ -48,8 +48,14 @@ main_pthread.o: main_pthread.cc MCSimulation_pthread.h
 main_pthread: main_pthread.o MCSimulation_pthread.o
 	$(CXX) $(CXXFLAGS) -pthread -o main_pthread main_pthread.o MCSimulation_pthread.o
 
+main_mcaad_pthread.o: main_mcaad_pthread.cc Node_v1.h Number_v1.h 
+	$(CXX) $(CXXFLAGS) -o main_mcaad_pthread.o -c main_mcaad_pthread.cc
+
+main_mcaad_pthread: main_mcaad_pthread.o  
+	$(CXX) $(CXXFLAGS) -o main_mcaad_pthread main_mcaad_pthread.o 	
+
 #######################################################
 .Phony: all clean
 
 clean:
-	rm -f *.o main main_aad main_mcaad main_pthread
+	rm -f *.o main main_aad main_mcaad main_pthread main_mcaad_pthread
