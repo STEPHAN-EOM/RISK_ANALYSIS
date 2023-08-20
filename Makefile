@@ -3,7 +3,7 @@ CXXFLAGS = -Wall -Wextra -std=c++17
 
 SOURCE = BSModel.h MCSimulation.h AAD.h  AAD_Tape.h
 
-all: main main_aad main_mcaad
+all: main main_aad main_mcaad main_pthread
 #######################################################
 MCSimulation.o: MCSimulation.cc MCSimulation.h 
 	$(CXX) $(CXXFLAGS) -o MCSimulation.o -c MCSimulation.cc
@@ -16,6 +16,9 @@ AAD.o: AAD.cc AAD.h AAD_Tape.h
 
 MCSimulation_aad.o: MCSimulation_aad.cc MCSimulation_aad.h Number_v1.h 
 	$(CXX) $(CXXFLAGS) -o MCSimulation_aad.o -c MCSimulation_aad.cc
+
+MCSimulation_pthread.o: MCSimulation_pthread.cc MCSimulation_pthread.h
+	$(CXX) $(CXXFLAGS) -pthread -o MCSimulation_pthread.o -c MCSimulation_pthread.cc
 
 main.o: main.cc $(SOURCE)
 	$(CXX) $(CXXFLAGS) -o main.o -c main.cc 
@@ -39,9 +42,14 @@ main_aad.o: main_aad.cc Node_v1.h Number_v1.h
 main_aad: main_aad.o 
 	$(CXX) $(CXXFLAGS) -o main_aad main_aad.o 
 
+main_pthread.o: main_pthread.cc MCSimulation_pthread.h
+	$(CXX) $(CXXFLAGS) -pthread -o main_pthread.o -c main_pthread.cc
+
+main_pthread: main_pthread.o MCSimulation_pthread.o
+	$(CXX) $(CXXFLAGS) -pthread -o main_pthread main_pthread.o MCSimulation_pthread.o
+
 #######################################################
 .Phony: all clean
 
 clean:
-	rm -f *.o main main_aad main_mcaad
-
+	rm -f *.o main main_aad main_mcaad main_pthread
