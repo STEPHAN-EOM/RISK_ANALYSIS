@@ -158,11 +158,14 @@ int main(){
     std::cout << "Result is " << Number::tape[tape_size-1]->Get_result() << std::endl;
 
 
-
     // Clear up
     for (int t = 0; t < NUM_THREADS; ++t) {
-        delete threadData[t];
+        if (threadData[t]) {
+            delete threadData[t];
+            threadData[t] = nullptr;  // Set the pointer to nullptr after deletion
+        }
     }
+
 
    if (getrusage(RUSAGE_SELF, &usage) == 0) {
         
