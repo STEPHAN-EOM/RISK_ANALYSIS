@@ -2,10 +2,14 @@
 #include <algorithm>
 #include <vector>
 #include <chrono>
+#include <sys/resource.h>
+#include <sys/time.h>
 #include "MCSimulation.h"
 
 int main() {
     
+    struct rusage usage;
+
      // Step.1 Monte-Carlo Simulation for FX rate
     double fx_initial = 1295.0;	    // Initial Forward FX spot price (Korea Won per US dollar)
     double fx_vol = 0.15; 		    // Foreign exchange volatility parameter
@@ -64,5 +68,21 @@ int main() {
 
     std::cout << "\nTime taken by MC Simulation for 5 sensitivities: " << duration << " milliseconds" << std::endl;
     
+    if (getrusage(RUSAGE_SELF, &usage) == 0) {
+        
+        // Calculate user and system CPU times
+        double userTime = (double)usage.ru_utime.tv_sec + (double)usage.ru_utime.tv_usec / 1e6;
+        double systemTime = (double)usage.ru_stime.tv_sec + (double)usage.ru_stime.tv_usec / 1e6;
+
+        std::cout << "User CPU time: " << userTime << " seconds" << std::endl;
+        std::cout << "System CPU time: " << systemTime << " seconds" << std::endl;
+
+        // If you want to print memory as well
+        std::cout << "Max memory used (KB): " << usage.ru_maxrss << std::endl;
+
+    } else {
+        std::cerr << "Error retrieving usage information." << std::endl;
+    }
+
     return 0;
 }

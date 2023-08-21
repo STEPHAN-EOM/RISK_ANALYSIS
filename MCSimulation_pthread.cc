@@ -20,7 +20,7 @@ void* MCSimulation<T>::threadFunction(void* arg) {
     for(int i = 0; i < data->num_sim_per_thread; ++i){
         T fx_rate = data->fx_initial;
         for (int j = 0; j < data->num_step; ++j){
-            double rand = data->distribution(data->generator);  // Note: you'll need to handle the generator
+            double rand = data->distribution(data->generator); 
             fx_rate *= exp(first * 365) * exp(second * sqrt(365) * rand);
         }
 

@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <utility>
 #include <chrono>
+#include <sys/resource.h>
+#include <sys/time.h>
 #include "Number_v1.h"
 //#include "Number_v2.h"
 //#include "MCSimulation_aad.h"
@@ -68,6 +70,8 @@ T f(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, double r_dom, int n
 
 int main(){
    
+   struct rusage usage;
+
     // Declare the initial parameters as Number
     Number spot_p = 1295.0;
     Number strike_p = 1300.0;
@@ -132,6 +136,21 @@ int main(){
     }
 */
 
+    if (getrusage(RUSAGE_SELF, &usage) == 0) {
+        
+        // Calculate user and system CPU times
+        double userTime = (double)usage.ru_utime.tv_sec + (double)usage.ru_utime.tv_usec / 1e6;
+        double systemTime = (double)usage.ru_stime.tv_sec + (double)usage.ru_stime.tv_usec / 1e6;
+
+        std::cout << "User CPU time: " << userTime << " seconds" << std::endl;
+        std::cout << "System CPU time: " << systemTime << " seconds" << std::endl;
+
+        // If you want to print memory as well
+        std::cout << "Max memory used (KB): " << usage.ru_maxrss << std::endl;
+
+    } else {
+        std::cerr << "Error retrieving usage information." << std::endl;
+    }
 
     return 0;
 }

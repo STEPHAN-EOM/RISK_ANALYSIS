@@ -5,6 +5,8 @@
 #include <utility>
 #include <chrono>
 #include <pthread.h>
+#include <sys/resource.h>
+#include <sys/time.h>
 #include "Number_v1.h"
 
 // Define a structure to pass data to each thread
@@ -52,6 +54,8 @@ void* Helper_Function(void* arg) {
 }
 
 int main(){
+
+    struct rusage usage;
    
     // Declare the initial parameters as Number
     Number spot_p = 1295.0;
@@ -158,6 +162,22 @@ int main(){
     // Clear up
     for (int t = 0; t < NUM_THREADS; ++t) {
         delete threadData[t];
+    }
+
+   if (getrusage(RUSAGE_SELF, &usage) == 0) {
+        
+        // Calculate user and system CPU times
+        double userTime = (double)usage.ru_utime.tv_sec + (double)usage.ru_utime.tv_usec / 1e6;
+        double systemTime = (double)usage.ru_stime.tv_sec + (double)usage.ru_stime.tv_usec / 1e6;
+
+        std::cout << "User CPU time: " << userTime << " seconds" << std::endl;
+        std::cout << "System CPU time: " << systemTime << " seconds" << std::endl;
+
+        // If you want to print memory as well
+        std::cout << "Max memory used (KB): " << usage.ru_maxrss << std::endl;
+
+    } else {
+        std::cerr << "Error retrieving usage information." << std::endl;
     }
 
     return 0;
