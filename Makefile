@@ -1,18 +1,15 @@
 CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++17
 
-SOURCE = BSModel.h MCSimulation.h AAD.h  AAD_Tape.h
+SOURCE = BSModel.h MCSimulation.h 
 
-all: main main_aad main_mcaad main_pthread main_mcaad_pthread main_omp
+all: main main_aad main_mcaad main_pthread main_mcaad_pthread
 #######################################################
 MCSimulation.o: MCSimulation.cc MCSimulation.h 
 	$(CXX) $(CXXFLAGS) -o MCSimulation.o -c MCSimulation.cc
 
 BSModel.o: BSModel.cc BSModel.h
 	$(CXX) $(CXXFLAGS) -o BSModel.o -c BSModel.cc	
-
-AAD.o: AAD.cc AAD.h AAD_Tape.h
-	$(CXX) $(CXXFLAGS) -o AAD.o -c AAD.cc
 
 MCSimulation_aad.o: MCSimulation_aad.cc MCSimulation_aad.h Number_v1.h 
 	$(CXX) $(CXXFLAGS) -o MCSimulation_aad.o -c MCSimulation_aad.cc
@@ -23,8 +20,8 @@ MCSimulation_pthread.o: MCSimulation_pthread.cc MCSimulation_pthread.h
 main.o: main.cc $(SOURCE)
 	$(CXX) $(CXXFLAGS) -o main.o -c main.cc 
 
-main: main.o BSModel.o  MCSimulation.o  AAD.o
-	$(CXX) $(CXXFLAGS) -o main main.o BSModel.o  MCSimulation.o AAD.o
+main: main.o BSModel.o  MCSimulation.o 
+	$(CXX) $(CXXFLAGS) -o main main.o BSModel.o  MCSimulation.o
 
 #main_mcaad.o: main_mcaad.cc Node_v1.h Number_v1.h MCSimulation_aad.h
 main_mcaad.o: main_mcaad.cc Node_v1.h Number_v1.h 

@@ -6,8 +6,6 @@
 #include <sys/time.h>
 #include "BSModel.h"
 #include "MCSimulation.h"
-#include "AAD.h"
-
 
 int main(){
 
@@ -130,46 +128,6 @@ int main(){
     std::cout << "Theta: " << theta1 << "\n";
     std::cout << "Vega: " << vega1 << "\n";
     std::cout << "Rho: " << rho1 << "\n";
-/*
-    // Step.4 AAD for Black-Scholes Formula
-    std::cout << "\n======== Checking the tape is working well ========\n";
-    Tape tape;
-
-    tape.add([]() { std::cout << "This is the first function\n"; });
-    tape.add([]() { std::cout << "This is the second function\n"; });
-    tape.add([]() { std::cout << "This is the third function\n"; });
-    
-    tape.rewind(); 
-    */
-
-    /*
-    DualNumber S(spot_p, 1.0, &tape); 
-    DualNumber K(strike_p, 0.0, &tape);  
-    DualNumber MT(maturity, 0.0, &tape);
-    DualNumber r(risk_neutral, 0.0, &tape);
-    DualNumber sigma(vol, 0.0, &tape);
-
-    // Calculate the Black-Scholes call price
-    DualNumber call_price = BS_Call(S, K, MT, r, sigma);
-
-    std::cout << "Call price: " << call_price.value << std::endl;
-
-    //tape.rewind();
-
-    // Compute Greeks
-    std::cout << "Start Calling Greeks Function" << std::endl; 
-    Greeks greeks = computeGreeks(spot_p, strike_p, maturity, risk_neutral, vol, tape);
-    std::cout << "Finish Computing Greeks" << std::endl; 
-
-    //tape.rewind();  
-
-    std::cout << "Delta: " << greeks.delta << std::endl;
-    std::cout << "Vega: " << greeks.vega << std::endl;
-    std::cout << "Theta: " << greeks.theta << std::endl;
-    std::cout << "Rho: " << greeks.rho << std::endl;
-    std::cout << "Gamma: " << greeks.gamma << std::endl;
-    std::cout << "Vanna: " << greeks.vanna << std::endl;
-    */
 
     if (getrusage(RUSAGE_SELF, &usage) == 0) {
         
