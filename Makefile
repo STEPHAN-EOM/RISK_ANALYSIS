@@ -49,10 +49,10 @@ main_pthread: main_pthread.o MCSimulation_pthread.o
 	$(CXX) $(CXXFLAGS) -pthread -o main_pthread main_pthread.o MCSimulation_pthread.o
 
 main_mcaad_pthread.o: main_mcaad_pthread.cc Node_v1.h Number_Pthread.h 
-	$(CXX) $(CXXFLAGS) -o main_mcaad_pthread.o -c main_mcaad_pthread.cc
+	$(CXX) $(CXXFLAGS) -pthread -o main_mcaad_pthread.o -c main_mcaad_pthread.cc
 
 main_mcaad_pthread: main_mcaad_pthread.o  
-	$(CXX) $(CXXFLAGS) -o main_mcaad_pthread main_mcaad_pthread.o 	
+	$(CXX) $(CXXFLAGS) -pthread -o main_mcaad_pthread main_mcaad_pthread.o
 
 #######################################################
 .Phony: all clean
