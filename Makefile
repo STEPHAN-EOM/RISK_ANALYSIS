@@ -60,7 +60,7 @@ main_mcaad_pthread: main_mcaad_pthread.o
 main_omp.o: main_omp.cc MCSimulation_omp.h
 	$(CXX) $(CXXFLAGS) -fopenmp -o main_omp.o -c main_omp.cc 
 
-main_omp: main.o MCSimulation_omp.o
+main_omp: main_omp.o MCSimulation_omp.o
 	$(CXX) $(CXXFLAGS) -fopenmp -o main_omp main_omp.o MCSimulation_omp.o
 
 #######################################################
