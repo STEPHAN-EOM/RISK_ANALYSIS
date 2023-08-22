@@ -1,5 +1,4 @@
 CXX = g++
-GXX = /opt/homebrew/Cellar/gcc/13.1.0/bin/gcc-13 -fopenmp 
 CXXFLAGS = -Wall -Wextra -std=c++17
 
 SOURCE = BSModel.h MCSimulation.h AAD.h  AAD_Tape.h
@@ -20,9 +19,6 @@ MCSimulation_aad.o: MCSimulation_aad.cc MCSimulation_aad.h Number_v1.h
 
 MCSimulation_pthread.o: MCSimulation_pthread.cc MCSimulation_pthread.h
 	$(CXX) $(CXXFLAGS) -pthread -o MCSimulation_pthread.o -c MCSimulation_pthread.cc
-
-MCSimulation_omp.o: MCSimulation_omp.cc MCSimulation_omp.h
-	$(GXX) $(CXXFLAGS) -fopenmp -o MCSimulation_omp.o -c MCSimulation_omp.cc
 
 main.o: main.cc $(SOURCE)
 	$(CXX) $(CXXFLAGS) -o main.o -c main.cc 
@@ -57,12 +53,6 @@ main_mcaad_pthread.o: main_mcaad_pthread.cc Node_v1.h Number_Pthread.h
 
 main_mcaad_pthread: main_mcaad_pthread.o  
 	$(CXX) $(CXXFLAGS) -pthread -o main_mcaad_pthread main_mcaad_pthread.o
-
-main_omp.o: main_omp.cc MCSimulation_omp.h
-	$(GXX) $(CXXFLAGS) -fopenmp -o main_omp.o -c main_omp.cc 
-
-main_omp: main_omp.o MCSimulation_omp.o
-	$(GXX) $(CXXFLAGS) -fopenmp -o main_omp main_omp.o MCSimulation_omp.o
 
 #######################################################
 .Phony: all clean
