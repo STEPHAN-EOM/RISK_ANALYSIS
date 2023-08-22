@@ -6,23 +6,27 @@
 #include <vector>
 #include <string>
 #include <optional>
-#include "Node_v2.h"
+#include "Node_v1.h"
 
 class Number{
-    Node* mynode;
-
+    std::unique_ptr<Node> mynode;
+/*
+    static void AddToTape(std::unique_ptr<Node> node) {
+        tape.push_back(std::move(node));
+    }
+*/
     public:
 
         static std::vector<std::unique_ptr<Node>> tape;
 
-        Number(double value) : mynode(new Leaf(value)) {
-            tape.push_back(std::unique_ptr<Node>(mynode));
-
-            //std::cout << "Constructing class for Number with Leaf" << std::endl;
+        Number(double value) : mynode(std::make_unique<Leaf>(value)) {
+            //AddToTape(std::make_unique<Leaf>(value));
+            tape.push_back(std::make_unique<Leaf>(value));
         };
 
-        Number(Node* node) : mynode(node) {
-            //std::cout << "Constructing class for Number with Node" << std::endl;
+        Number(std::unique_ptr<Node> node) : mynode(node.get()) {
+            tape.push_back(std::move(node));
+             //std::cout << "Constructing class for Number with Node" << std::endl;
         };
 
         ~Number(){
@@ -30,15 +34,15 @@ class Number{
         };
 
         Node* node(){
-            return mynode;
+            return mynode.get();
         }
 
         void Set_value(double value){
-            dynamic_cast<Leaf*>(mynode) -> Set_value(value);
+            dynamic_cast<Leaf*>(mynode.get()) -> Set_value(value);
         }
 
         double Get_value() {
-            return dynamic_cast<Leaf*>(mynode) -> Get_value();
+            return dynamic_cast<Leaf*>(mynode.get()) -> Get_value();
         }
 
         double& Get_adjoint(){
@@ -50,7 +54,7 @@ class Number{
             mynode -> Get_adjoint() = 1.0;
 
             auto it = tape.rbegin();
-            while (it-> get() != mynode){
+            while (it-> get() != mynode.get()){
                 ++it;
             }
 
@@ -73,8 +77,11 @@ class Number{
         }
 
     private:
-    
+        //Number(std::unique_ptr<Node> node) : mynode(std::move(node)) {};
+
         static std::optional<size_t> tapeMark;
+
+        //friend Number operator+(Number lhs, Number rhs);
         
 };
 
@@ -82,100 +89,74 @@ std::vector<std::unique_ptr<Node>> Number::tape;
 std::optional<size_t> Number::tapeMark = std::nullopt;
 
 Number operator+(Number lhs, Number rhs){
-    Node* n = new AddNode(lhs.node(), rhs.node());
-    Number::tape.push_back(std::unique_ptr<Node>(n));
-
-    return n;
+    auto n = std::make_unique<AddNode>(lhs.node(), rhs.node());
+    return Number(std::move(n));
 }
 
 Number operator-(Number lhs, Number rhs){
-    Node* n = new SubNode(lhs.node(), rhs.node());
-    Number::tape.push_back(std::unique_ptr<Node>(n));
-
-    return n;
+    auto n = std::make_unique<SubNode>(lhs.node(), rhs.node());
+    return Number(std::move(n));
 }
 
 Number operator*(Number lhs, Number rhs){
-    Node* n = new MulNode(lhs.node(), rhs.node());
-    Number::tape.push_back(std::unique_ptr<Node>(n));
-
-    return n;
+    auto n = std::make_unique<MulNode>(lhs.node(), rhs.node());
+    return Number(std::move(n));
 }
 
 Number operator*(Number lhs, double rhs){
-    Node* n = new MulDoubleNode(lhs.node(), rhs);
-    Number::tape.push_back(std::unique_ptr<Node>(n));
-
-    return n;
+    auto n = std::make_unique<MulDoubleNode>(lhs.node(), rhs);
+    return Number(std::move(n));
 }
 
 Number operator/(Number lhs, Number rhs){
-    Node*n = new DivNode(lhs.node(), rhs.node());
-    Number::tape.push_back(std::unique_ptr<Node>(n));
-
-    return n;
+    auto n = std::make_unique<DivNode>(lhs.node(), rhs.node());
+    return Number(std::move(n));
 }
 
 Number operator/(Number lhs, double rhs){
-    Node*n = new DivDoubleNode(lhs.node(), rhs);
-    Number::tape.push_back(std::unique_ptr<Node>(n));
-
-    return n;
+    auto n = std::make_unique<DivDoubleNode>(lhs.node(), rhs);
+    return Number(std::move(n));
 }
 
 Number operator-(Number arg){
-    Node* n = new MinusNode(arg.node());
-    Number::tape.push_back(std::unique_ptr<Node>(n));
-
-    return n;
+    auto n = std::make_unique<MinusNode>(arg.node());
+    return Number(std::move(n));
 }
 
 Number log(Number arg){
-    Node* n = new LogNode(arg.node());
-    Number::tape.push_back(std::unique_ptr<Node>(n));
-
-    return n;
+    auto n = std::make_unique<LogNode>(arg.node());
+    return Number(std::move(n));
 }
 
 Number exp(Number arg){
-    Node* n = new ExpNode(arg.node());
-    Number::tape.push_back(std::unique_ptr<Node>(n));
-
-    return n;
+    auto n = std::make_unique<ExpNode>(arg.node());
+    return Number(std::move(n));
 }
 
 Number sqrt(Number arg){
-    Node* n = new SqrtNode(arg.node());
-    Number::tape.push_back(std::unique_ptr<Node>(n));
-
-    return n;
+    auto n = std::make_unique<SqrtNode>(arg.node());
+    return Number(std::move(n));
 }
 
 Number N(Number arg){
-    Node* n = new NormalNode(arg.node());
-    Number::tape.push_back(std::unique_ptr<Node>(n));
-
-    return n;
+    auto n = std::make_unique<NormalNode>(arg.node());
+    return Number(std::move(n));
 }
 
 Number max(Number lhs, Number rhs) {
-    Node* n = new MaxNode(lhs.node(), rhs.node());
-    Number::tape.push_back(std::unique_ptr<Node>(n));
-
-    return n;
+    auto n = std::make_unique<MaxNode>(lhs.node(), rhs.node());
+    return Number(std::move(n));
 }
 
 Number& operator+=(Number& lhs, Number rhs) {
-    Node* n = new AddNode(lhs.node(), rhs.node());
-    Number::tape.push_back(std::unique_ptr<Node>(n));
-    lhs = n;
+    auto n = std::make_unique<AddNode>(lhs.node(), rhs.node());
+    lhs = Number(std::move(n));  // Update the lhs to point to the new node.
     return lhs;
 }
 
 Number& operator*=(Number& lhs, Number rhs) {
-    Node* n = new MulNode(lhs.node(), rhs.node());
-    Number::tape.push_back(std::unique_ptr<Node>(n));
-    lhs = n;
+    auto n = std::make_unique<MulNode>(lhs.node(), rhs.node());
+    lhs = Number(std::move(n));  // Update the lhs to point to the new node.
     return lhs;
 }
 

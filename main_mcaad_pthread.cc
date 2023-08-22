@@ -7,7 +7,7 @@
 #include <pthread.h>
 #include <sys/resource.h>
 #include <sys/time.h>
-#include "Number_v1.h"
+#include "Number_Pthread.h"
 
 // Define a structure to pass data to each thread
 template <class T>
@@ -15,8 +15,8 @@ struct ThreadData {
     T spot_p, strike_p, risk_neutral, vol, maturity;
     double r_dom;
     int start_sim, end_sim, num_step;
-    T *sum_op;
-    pthread_mutex_t *mutex;
+    T local_sum;
+    std::vector<std::unique_ptr<Node>> local_tape;
 };
 
 // The function executed by each thread
@@ -30,7 +30,9 @@ void* MonteCarloThread(void* arg) {
     T dt = data->maturity / (365.0 * data->num_step);
     T first = (data->risk_neutral - (0.5 * data->vol * data->vol)) * dt;
     T second = data->vol * sqrt(dt);
-
+    
+    T local_sum = 0.0;
+    std::vector<std::unique_ptr<Node>> local_tape;
     for (int i = data->start_sim; i < data->end_sim; ++i){
         T fx_rate = data->spot_p;
         for (int j = 0; j < data->num_step; ++j){
@@ -38,13 +40,28 @@ void* MonteCarloThread(void* arg) {
             fx_rate *= exp(first * 365) * exp(second * sqrt(365) * rand);
         }
 
-        T payoff = max(fx_rate - data -> strike_p, 0.0);
+        T payoff = max(fx_rate - data->strike_p, 0.0);
+
+        // Update the local tape with new nodes
+        Node* n = new Leaf(payoff.Get_value());
+        data->local_tape.push_back(std::unique_ptr<Node>(n));
+
+        // Update the local sum
+        data->local_sum += payoff;
         
-        // Synchronize update to shared data
-        pthread_mutex_lock(data->mutex);
-        *data->sum_op += payoff; // Assuming Get_value() gives the double value
-        pthread_mutex_unlock(data->mutex);
+        //local_sum += payoff;
+
+        //Node* n = new Leaf(payoff.Get_value());
+        //local_tape.push_back(std::unique_ptr<Node>(n));
+        // Record operations on the local tape
+        //data->local_tape.push_back(std::unique_ptr<Node>(payoff.node()));
+        
+        // Update local sum
+        //data->local_sum_op += payoff;
     }
+
+    data->local_sum = local_sum;
+    data->local_tape = std::move(local_tape);
     
     return NULL;
 }
@@ -77,10 +94,10 @@ int main(){
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-    // Initialize mutex for shared data access
+    // Initialise mutex for shared data access
     pthread_mutex_t sum_mutex;
     pthread_mutex_init(&sum_mutex, NULL);
-
+ 
     Number sum_op = 0.0;
 
     // Split the simulations across threads
@@ -89,32 +106,52 @@ int main(){
 
     ThreadData<Number>* threadData[NUM_THREADS];
     for (int t = 0; t < NUM_THREADS; ++t) {
-        threadData[t] = new ThreadData<Number>{spot_p, strike_p, risk_neutral, vol, maturity, r_dom, t * sims_per_thread, (t + 1) * sims_per_thread, num_step, &sum_op, &sum_mutex};
+        threadData[t] = new ThreadData<Number>{ spot_p, strike_p, risk_neutral, vol, maturity, r_dom,
+                                                t * sims_per_thread, (t + 1) * sims_per_thread, num_step,
+                                                0.0,
+                                                std::vector<std::unique_ptr<Node>>() 
+                                                
+        };
 
         if (!threadData[t]) {
-           std::cerr << "Memory allocation failed for threadData[" << t << "]" << std::endl;
+            std::cerr << "Memory allocation failed for threadData[" << t << "]" << std::endl;
             exit(EXIT_FAILURE);
         }
 
         int createResult = pthread_create(&threads[t], &attr, Helper_Function, (void *)threadData[t]);
         if (createResult) {
             std::cerr << "Failed to create thread " << t << ". Error code: " << createResult << std::endl;
-            threads[t] = 0;  // Mark thread as not created
+            threads[t] = 0;
         }
     }
 
     std::cout << "The following part causes Segmentation Fault" << std::endl;
-    // Wait for all threads to complete
+
+     // Wait for all threads to complete
     for (int t = 0; t < NUM_THREADS; ++t) {
-       if (threads[t] != 0) {  // Join thread only if it was successfully created
+        if (threads[t] != 0) {
             pthread_join(threads[t], NULL);
-            threads[t] = 0;  // Mark thread as joined
+            std::cout << "Done3" << std::endl;
+            sum_op += threadData[t]->local_sum;
+            std::cout << "Done4" << std::endl;
+            threads[t] = 0;
+            std::cout << "Done5" << std::endl;
         }
     }
 
     std::cout << "Done" << std::endl;
     pthread_attr_destroy(&attr);
     pthread_mutex_destroy(&sum_mutex);
+
+
+  
+    //Number sum_op = 0.0;
+    for (int t = 0; t < NUM_THREADS; ++t) {
+        sum_op += threadData[t]->local_sum;
+    }
+    
+    // Clean up
+    pthread_attr_destroy(&attr);
 
     Number average_op = sum_op / num_sim;
     Number discount = exp(-r_dom);
