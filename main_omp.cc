@@ -43,6 +43,7 @@ int main(){
     std::pair<double, double> Option_result1, Option_result2, Option_result3, Option_result4, Option_result5;
 
     // Step.3 Use bump and reval to compute options on these instruments
+    /*
      #pragma omp parallel sections
     {
         #pragma omp section{
@@ -61,6 +62,12 @@ int main(){
             Option_result5 = FX_simulator1.MC_Simulation(Strike + eps, num_step);
         }
     }
+    */
+    Option_result1 = FX_simulator1.MC_Simulation(Strike, num_step);
+    Option_result2 = FX_simulator2.MC_Simulation(Strike, num_step);
+    Option_result3 = FX_simulator3.MC_Simulation(Strike, num_step);
+    Option_result4 = FX_simulator4.MC_Simulation(Strike, num_step); 
+    Option_result5 = FX_simulator1.MC_Simulation(Strike + eps, num_step);
 
     double delta_bump = (Option_result1.second - FX_result.second) / eps;
     double vega_bump = (Option_result2.second - FX_result.second) / eps;
