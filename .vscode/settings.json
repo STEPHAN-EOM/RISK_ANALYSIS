@@ -64,6 +64,7 @@
         "numeric": "cpp",
         "random": "cpp",
         "algorithm": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "thread": "cpp"
     }
 }
