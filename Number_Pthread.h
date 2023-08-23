@@ -8,24 +8,24 @@
 #include <optional>
 #include <thread>
 #include <mutex>
-#include "Node_v1.h"
+#include "Node_v2.h"
 
 class Number{
-    Node* mynode;
+    std::shared_ptr<Node> mynode;
 
     public:
 
-        static std::vector<std::unique_ptr<Node>> tape;
-        thread_local static std::vector<std::unique_ptr<Node>> local_tape;
+        static std::vector<std::shared_ptr<Node>> tape;
+        thread_local static std::vector<std::shared_ptr<Node>> local_tape;
         static std::mutex tape_mutex;
 
-        Number(double value) : mynode(new Leaf(value)) {
-            tape.push_back(std::unique_ptr<Node>(mynode));
+        Number(double value) : mynode(std::make_shared<Leaf>(value)) {
+            tape.push_back(mynode);
 
             //std::cout << "Constructing class for Number with Leaf" << std::endl;
         };
 
-        Number(Node* node) : mynode(node) {
+        Number(const std::shared_ptr<Node>& node) : mynode(node) {
             //std::cout << "Constructing class for Number with Node" << std::endl;
         };
 
@@ -33,16 +33,24 @@ class Number{
             //std::cout << "Destroying class for Numbers" << std::endl;
         };
 
-        Node* node(){
+       std::shared_ptr<Node> node(){
             return mynode;
         }
 
         void Set_value(double value){
-            dynamic_cast<Leaf*>(mynode) -> Set_value(value);
+             auto leafNode = std::dynamic_pointer_cast<Leaf>(mynode);
+            if (leafNode) {
+                leafNode->Set_value(value);
+            }
         }
 
         double Get_value() {
-            return dynamic_cast<Leaf*>(mynode) -> Get_value();
+             auto leafNode = std::dynamic_pointer_cast<Leaf>(mynode);
+            if (leafNode) {
+                return leafNode->Get_value();
+            }
+
+            return 0.0;
         }
 
         double& Get_adjoint(){
@@ -54,7 +62,7 @@ class Number{
             mynode -> Get_adjoint() = 1.0;
 
             auto it = tape.rbegin();
-            while (it-> get() != mynode){
+            while (it != tape.rend() && *it != mynode){
                 ++it;
             }
 
@@ -62,6 +70,10 @@ class Number{
                 (*it) -> Propagate_adj();
                 ++it;
             }
+        }
+
+        void setNode(const std::shared_ptr<Node>& newNode) {
+            mynode = newNode;
         }
 
         static void Mark_tape();
@@ -79,100 +91,102 @@ extern thread_local std::vector<std::unique_ptr<Node>> local_tape;
 extern std::optional<size_t> tapeMark;
 
 inline Number operator+(Number lhs, Number rhs){
-    Node* n = new AddNode(lhs.node(), rhs.node());
-    Number::local_tape.push_back(std::unique_ptr<Node>(n));
+    std::shared_ptr<Node> n = std::make_shared<AddNode>(lhs.node(), rhs.node());
+    Number::local_tape.push_back(n);
 
-    return n;
+    return Number(n);
 }
 
 inline Number operator-(Number lhs, Number rhs){
-    Node* n = new SubNode(lhs.node(), rhs.node());
-    Number::local_tape.push_back(std::unique_ptr<Node>(n));
+    std::shared_ptr<Node> n = std::make_shared<SubNode>(lhs.node(), rhs.node());
+    Number::local_tape.push_back(n);
 
-    return n;
+    return Number(n);
 }
 
 inline Number operator*(Number lhs, Number rhs){
-    Node* n = new MulNode(lhs.node(), rhs.node());
-    Number::local_tape.push_back(std::unique_ptr<Node>(n));
+    std::shared_ptr<Node> n = std::make_shared<MulNode>(lhs.node(), rhs.node());
+    Number::local_tape.push_back(n);
 
-    return n;
+    return Number(n);
 }
 
 inline Number operator*(Number lhs, double rhs){
-    Node* n = new MulDoubleNode(lhs.node(), rhs);
-    Number::local_tape.push_back(std::unique_ptr<Node>(n));
+    std::shared_ptr<Node> n = std::make_shared<MulDoubleNode>(lhs.node(), rhs);
+    Number::local_tape.push_back(n);
 
-    return n;
+    return Number(n);
 }
 
 inline Number operator/(Number lhs, Number rhs){
-    Node*n = new DivNode(lhs.node(), rhs.node());
-    Number::local_tape.push_back(std::unique_ptr<Node>(n));
+    std::shared_ptr<Node> n = std::make_shared<DivNode>(lhs.node(), rhs.node());
+    Number::local_tape.push_back(n);
 
-    return n;
+    return Number(n);
 }
 
 inline Number operator/(Number lhs, double rhs){
-    Node*n = new DivDoubleNode(lhs.node(), rhs);
-    Number::local_tape.push_back(std::unique_ptr<Node>(n));
+    std::shared_ptr<Node> n = std::make_shared<DivDoubleNode>(lhs.node(), rhs);
+    Number::local_tape.push_back(n);
 
-    return n;
+    return Number(n);
 }
 
 inline Number operator-(Number arg){
-    Node* n = new MinusNode(arg.node());
-    Number::local_tape.push_back(std::unique_ptr<Node>(n));
+    std::shared_ptr<Node> n = std::make_shared<MinusNode>(arg.node());
+    Number::local_tape.push_back(n);
 
-    return n;
+    return Number(n);
 }
 
 inline Number log(Number arg){
-    Node* n = new LogNode(arg.node());
-    Number::local_tape.push_back(std::unique_ptr<Node>(n));
+    std::shared_ptr<Node> n = std::make_shared<LogNode>(arg.node());
+    Number::local_tape.push_back(n);
 
-    return n;
+    return Number(n);
 }
 
 inline Number exp(Number arg){
-    Node* n = new ExpNode(arg.node());
-    Number::local_tape.push_back(std::unique_ptr<Node>(n));
+    std::shared_ptr<Node> n = std::make_shared<ExpNode>(arg.node());
+    Number::local_tape.push_back(n);
 
-    return n;
+    return Number(n);
 }
 
 inline Number sqrt(Number arg){
-    Node* n = new SqrtNode(arg.node());
-    Number::local_tape.push_back(std::unique_ptr<Node>(n));
+    std::shared_ptr<Node> n = std::make_shared<SqrtNode>(arg.node());
+    Number::local_tape.push_back(n);
 
-    return n;
+    return Number(n);
 }
 
 inline Number N(Number arg){
-    Node* n = new NormalNode(arg.node());
-    Number::local_tape.push_back(std::unique_ptr<Node>(n));
+    std::shared_ptr<Node> n = std::make_shared<NormalNode>(arg.node());
+    Number::local_tape.push_back(n);
 
-    return n;
+    return Number(n);
 }
 
 inline Number max(Number lhs, Number rhs) {
-    Node* n = new MaxNode(lhs.node(), rhs.node());
-    Number::local_tape.push_back(std::unique_ptr<Node>(n));
+    std::shared_ptr<Node> n = std::make_shared<MaxNode>(lhs.node(), rhs.node());
+    Number::local_tape.push_back(n);
 
-    return n;
+    return Number(n);
 }
 
 inline Number& operator+=(Number& lhs, Number rhs) {
-    Node* n = new AddNode(lhs.node(), rhs.node());
-    Number::local_tape.push_back(std::unique_ptr<Node>(n));
-    lhs = n;
+    std::shared_ptr<Node> n = std::make_shared<AddNode>(lhs.node(), rhs.node());
+    Number::local_tape.push_back(n);
+    lhs.setNode(n);
+
     return lhs;
 }
 
 inline Number& operator*=(Number& lhs, Number rhs) {
-    Node* n = new MulNode(lhs.node(), rhs.node());
-    Number::local_tape.push_back(std::unique_ptr<Node>(n));
-    lhs = n;
+    std::shared_ptr<Node> n = std::make_shared<MulNode>(lhs.node(), rhs.node());
+    Number::local_tape.push_back(n);
+    lhs.setNode(n);
+    
     return lhs;
 }
 

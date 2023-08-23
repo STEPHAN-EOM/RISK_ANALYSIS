@@ -59,10 +59,10 @@ main_pthread: main_pthread.o MCSimulation_pthread.o
 
 #main_multiaad.o: main_multiaad.cc Node_v1.h Number_Pthread.h Parallel_aad.h
 main_multiaad.o: main_multiaad.cc Parallel_aad.h Node_v1.h Number_Pthread.h
-	$(CXX) $(CXXFLAGS) -pthread -o main_multiaad.o -c main_multiaad.cc
+	$(CXX) $(CXXFLAGS) -pthread -o main_multiaad.o -c main_multiaad.cc -fsanitize=address
 
 main_multiaad: main_multiaad.o Parallel_aad.o Number_Pthread.o
-	$(CXX) $(CXXFLAGS) -pthread -o main_multiaad main_multiaad.o Parallel_aad.o Number_Pthread.o
+	$(CXX) $(CXXFLAGS) -pthread -o main_multiaad main_multiaad.o Parallel_aad.o Number_Pthread.o -fsanitize=address
 
 #######################################################
 .Phony: all clean

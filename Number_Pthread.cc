@@ -1,9 +1,9 @@
 #include "Number_Pthread.h"
 
-std::vector<std::unique_ptr<Node>> Number::tape;
+std::vector<std::shared_ptr<Node>> Number::tape;
 std::mutex Number::tape_mutex; 
 std::optional<size_t> Number::tapeMark = std::nullopt;
-thread_local std::vector<std::unique_ptr<Node>> Number::local_tape = {}; 
+thread_local std::vector<std::shared_ptr<Node>> Number::local_tape = {}; 
 
 void Number::Mark_tape(){
             tapeMark = tape.size();
