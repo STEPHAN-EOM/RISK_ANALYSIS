@@ -7,6 +7,7 @@
 #include <string>
 #include <optional>
 #include <thread>
+#include <mutex>
 #include "Node_v1.h"
 
 class Number{
@@ -16,6 +17,7 @@ class Number{
 
         static std::vector<std::unique_ptr<Node>> tape;
         thread_local static std::vector<std::unique_ptr<Node>> local_tape;
+        static std::mutex tape_mutex;
 
         Number(double value) : mynode(new Leaf(value)) {
             tape.push_back(std::unique_ptr<Node>(mynode));
@@ -62,17 +64,9 @@ class Number{
             }
         }
 
-        static void Mark_tape(){
-            tapeMark = tape.size();
-        }
-
-        static void Rewind_Mark(){
-            if(tapeMark.has_value()){
-                //tape.erase(tape.begin() + tapeMark.value(), tape.end());
-                tape.resize(tapeMark.value());
-                tapeMark.reset();
-            }
-        }
+        static void Mark_tape();
+        static void Rewind_Mark();
+        static void CombineLocalTape();
 
     private:
     
@@ -80,103 +74,102 @@ class Number{
         
 };
 
-std::vector<std::unique_ptr<Node>> Number::tape;
-std::optional<size_t> Number::tapeMark = std::nullopt;
+extern std::vector<std::unique_ptr<Node>> tape;
+extern thread_local std::vector<std::unique_ptr<Node>> local_tape;
+extern std::optional<size_t> tapeMark;
 
-thread_local std::vector<std::unique_ptr<Node>> Number::local_tape = {}; 
-
-Number operator+(Number lhs, Number rhs){
+inline Number operator+(Number lhs, Number rhs){
     Node* n = new AddNode(lhs.node(), rhs.node());
     Number::local_tape.push_back(std::unique_ptr<Node>(n));
 
     return n;
 }
 
-Number operator-(Number lhs, Number rhs){
+inline Number operator-(Number lhs, Number rhs){
     Node* n = new SubNode(lhs.node(), rhs.node());
     Number::local_tape.push_back(std::unique_ptr<Node>(n));
 
     return n;
 }
 
-Number operator*(Number lhs, Number rhs){
+inline Number operator*(Number lhs, Number rhs){
     Node* n = new MulNode(lhs.node(), rhs.node());
     Number::local_tape.push_back(std::unique_ptr<Node>(n));
 
     return n;
 }
 
-Number operator*(Number lhs, double rhs){
+inline Number operator*(Number lhs, double rhs){
     Node* n = new MulDoubleNode(lhs.node(), rhs);
     Number::local_tape.push_back(std::unique_ptr<Node>(n));
 
     return n;
 }
 
-Number operator/(Number lhs, Number rhs){
+inline Number operator/(Number lhs, Number rhs){
     Node*n = new DivNode(lhs.node(), rhs.node());
     Number::local_tape.push_back(std::unique_ptr<Node>(n));
 
     return n;
 }
 
-Number operator/(Number lhs, double rhs){
+inline Number operator/(Number lhs, double rhs){
     Node*n = new DivDoubleNode(lhs.node(), rhs);
     Number::local_tape.push_back(std::unique_ptr<Node>(n));
 
     return n;
 }
 
-Number operator-(Number arg){
+inline Number operator-(Number arg){
     Node* n = new MinusNode(arg.node());
     Number::local_tape.push_back(std::unique_ptr<Node>(n));
 
     return n;
 }
 
-Number log(Number arg){
+inline Number log(Number arg){
     Node* n = new LogNode(arg.node());
     Number::local_tape.push_back(std::unique_ptr<Node>(n));
 
     return n;
 }
 
-Number exp(Number arg){
+inline Number exp(Number arg){
     Node* n = new ExpNode(arg.node());
     Number::local_tape.push_back(std::unique_ptr<Node>(n));
 
     return n;
 }
 
-Number sqrt(Number arg){
+inline Number sqrt(Number arg){
     Node* n = new SqrtNode(arg.node());
     Number::local_tape.push_back(std::unique_ptr<Node>(n));
 
     return n;
 }
 
-Number N(Number arg){
+inline Number N(Number arg){
     Node* n = new NormalNode(arg.node());
     Number::local_tape.push_back(std::unique_ptr<Node>(n));
 
     return n;
 }
 
-Number max(Number lhs, Number rhs) {
+inline Number max(Number lhs, Number rhs) {
     Node* n = new MaxNode(lhs.node(), rhs.node());
     Number::local_tape.push_back(std::unique_ptr<Node>(n));
 
     return n;
 }
 
-Number& operator+=(Number& lhs, Number rhs) {
+inline Number& operator+=(Number& lhs, Number rhs) {
     Node* n = new AddNode(lhs.node(), rhs.node());
     Number::local_tape.push_back(std::unique_ptr<Node>(n));
     lhs = n;
     return lhs;
 }
 
-Number& operator*=(Number& lhs, Number rhs) {
+inline Number& operator*=(Number& lhs, Number rhs) {
     Node* n = new MulNode(lhs.node(), rhs.node());
     Number::local_tape.push_back(std::unique_ptr<Node>(n));
     lhs = n;

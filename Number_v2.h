@@ -6,10 +6,11 @@
 #include <vector>
 #include <string>
 #include <optional>
-#include "Node_v1.h"
+#include <cmath>
+#include "Node_v2.h"
 
 class Number{
-    std::unique_ptr<Node> mynode;
+    std::shared_ptr<Node> mynode;
 /*
     static void AddToTape(std::unique_ptr<Node> node) {
         tape.push_back(std::move(node));
@@ -17,14 +18,14 @@ class Number{
 */
     public:
 
-        static std::vector<std::unique_ptr<Node>> tape;
+        static std::vector<std::shared_ptr<Node>> tape;
 
         Number(double value) : mynode(std::make_unique<Leaf>(value)) {
             //AddToTape(std::make_unique<Leaf>(value));
             tape.push_back(std::make_unique<Leaf>(value));
         };
 
-        Number(std::unique_ptr<Node> node) : mynode(node.get()) {
+        Number(std::shared_ptr<Node> node) : mynode(node.get()) {
             tape.push_back(std::move(node));
              //std::cout << "Constructing class for Number with Node" << std::endl;
         };
@@ -64,6 +65,21 @@ class Number{
             }
         }
 
+        Number& operator+=(Number rhs) {
+            auto n = std::make_shared<AddNode>(this->node(), rhs.node());
+            this->mynode = n; // Update the object's node pointer
+            tape.push_back(n); // Add the new node to the tape
+            return *this;
+        }
+
+        Number& operator*=(Number rhs) {
+            auto n = std::make_shared<MulNode>(this->node(), rhs.node());
+            this->mynode = n; // Update the object's node pointer
+            tape.push_back(n); // Add the new node to the tape
+            return *this;
+        }
+
+
         static void Mark_tape(){
             tapeMark = tape.size();
         }
@@ -85,7 +101,7 @@ class Number{
         
 };
 
-std::vector<std::unique_ptr<Node>> Number::tape;
+std::vector<std::shared_ptr<Node>> Number::tape;
 std::optional<size_t> Number::tapeMark = std::nullopt;
 
 Number operator+(Number lhs, Number rhs){

@@ -4,7 +4,7 @@
 #include <chrono>
 #include <sys/resource.h>
 #include <sys/time.h>
-#include "MCSimulation.h"
+#include "MCSimulation_pthread.h"
 
 int main() {
     

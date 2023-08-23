@@ -25,6 +25,8 @@ T f(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, double r_dom, int n
     T sum_op = 0.0;
     T payoff = 0.0;
 
+    //Number::Mark_tape();
+
     for (int i = 0; i < num_sim; ++i){
         T fx_rate = spot_p;
 
@@ -65,7 +67,6 @@ T f(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, double r_dom, int n
     //Number::tape.push_back(std::make_unique<Leaf>(result_fx.Get_value()));
     //Number::tape.push_back(std::make_unique<Leaf>(result_op.Get_value()));
     return result_op;
-
 }
 
 int main(){

@@ -24,7 +24,7 @@ class Node {
             //std::cout << "Destroying the Node" << std::endl;
         };
 
-        double Get_result() const {
+        double Get_result() const{
             return result;
         }
 
@@ -37,7 +37,7 @@ class Node {
         }
 
         void Reset_adjoint(){
-            for (auto& i : arguments) i -> Reset_adjoint();;
+            for (auto i : arguments) i -> Reset_adjoint();
             adjoint = 0.0;
         }
 
@@ -47,10 +47,9 @@ class Node {
 
 class AddNode : public Node{
     public:
-        AddNode(Node* lhs, Node* rhs){
-            arguments.resize(2);
-            arguments[0] = lhs;
-            arguments[1] = rhs;
+        AddNode(const std::shared_ptr<Node>& lhs, const std::shared_ptr<Node>& rhs){
+            arguments.push_back(lhs);
+            arguments.push_back(rhs);
 
             result = lhs->Get_result() + rhs->Get_result();
 
@@ -71,10 +70,9 @@ class AddNode : public Node{
 
 class SubNode : public Node{
     public:
-        SubNode(Node* lhs, Node* rhs){
-            arguments.resize(2);
-            arguments[0] = lhs;
-            arguments[1] = rhs;
+        SubNode(const std::shared_ptr<Node>& lhs, const std::shared_ptr<Node>& rhs){
+            arguments.push_back(lhs);
+            arguments.push_back(rhs);
 
             result = lhs->Get_result() - rhs->Get_result();
 
@@ -95,10 +93,9 @@ class SubNode : public Node{
 
 class MulNode : public Node{
     public:
-        MulNode(Node* lhs, Node* rhs){
-            arguments.resize(2);
-            arguments[0] = lhs;
-            arguments[1] = rhs;
+        MulNode(const std::shared_ptr<Node>& lhs, const std::shared_ptr<Node>& rhs){
+            arguments.push_back(lhs);
+            arguments.push_back(rhs);
 
             result = lhs->Get_result() * rhs->Get_result();
 
@@ -121,9 +118,8 @@ class MulDoubleNode : public Node{
     double multiplier;
 
     public:
-        MulDoubleNode(Node* lhs, double rhs){
-            arguments.resize(1);
-            arguments[0] = lhs;
+        MulDoubleNode(const std::shared_ptr<Node>& lhs, double rhs){
+            arguments.push_back(lhs);
             multiplier = rhs;
 
             result = lhs->Get_result() * multiplier;
@@ -144,10 +140,9 @@ class MulDoubleNode : public Node{
 
 class DivNode : public Node{
     public:
-        DivNode(Node* lhs, Node* rhs){
-            arguments.resize(2);
-            arguments[0] = lhs;
-            arguments[1] = rhs;
+        DivNode(const std::shared_ptr<Node>& lhs, const std::shared_ptr<Node>& rhs){
+            arguments.push_back(lhs);
+            arguments.push_back(rhs);
 
             result = lhs->Get_result() / rhs->Get_result();
 
@@ -170,9 +165,8 @@ class DivDoubleNode : public Node{
     double divisor;
 
     public:
-        DivDoubleNode(Node* lhs, double rhs){
-            arguments.resize(1);
-            arguments[0] = lhs;
+        DivDoubleNode(const std::shared_ptr<Node>& lhs, double rhs){
+            arguments.push_back(lhs);
             divisor = rhs;
 
             result = lhs->Get_result() / divisor;
@@ -193,9 +187,8 @@ class DivDoubleNode : public Node{
 
 class MinusNode : public Node{
     public:
-        MinusNode(Node* arg){
-            arguments.resize(1);
-            arguments[0] = arg;
+        MinusNode(const std::shared_ptr<Node>& arg){
+            arguments.push_back(arg);
 
             result = (-1) * (arg->Get_result());
 
@@ -216,9 +209,8 @@ class MinusNode : public Node{
 
 class LogNode : public Node{
     public:
-        LogNode(Node* arg){
-            arguments.resize(1);
-            arguments[0] = arg;
+        LogNode(const std::shared_ptr<Node>& arg){
+            arguments.push_back(arg);
 
             result = log(arg->Get_result());
 
@@ -237,9 +229,8 @@ class LogNode : public Node{
 
 class ExpNode : public Node{
     public:
-        ExpNode(Node* arg){
-            arguments.resize(1);
-            arguments[0] = arg;
+        ExpNode(const std::shared_ptr<Node>& arg){
+            arguments.push_back(arg);
 
             result = exp(arg->Get_result());
 
@@ -258,9 +249,8 @@ class ExpNode : public Node{
 
 class SqrtNode : public Node{
      public:
-        SqrtNode(Node* arg){
-            arguments.resize(1);
-            arguments[0] = arg;
+        SqrtNode(const std::shared_ptr<Node>& arg){
+            arguments.push_back(arg);
 
             result = sqrt(arg->Get_result());
 
@@ -280,9 +270,8 @@ class SqrtNode : public Node{
 
 class NormalNode : public Node{
      public:
-        NormalNode(Node* arg){
-            arguments.resize(1);
-            arguments[0] = arg;
+        NormalNode(const std::shared_ptr<Node>& arg){
+            arguments.push_back(arg);
             
             result = 0.5 * erfc(-1 * arg->Get_result() * M_SQRT1_2);
 
@@ -327,13 +316,13 @@ class Leaf : public Node{
 };
 
 class MaxNode : public Node{
-    public:
-        MaxNode(Node* lhs, Node* rhs){
-            arguments.resize(2);
-            arguments[0] = lhs;
-            arguments[1] = rhs;
+    private:
+        std::array<std::shared_ptr<Node>, 2> arguments;
 
-            result = std::max(lhs->Get_result(), rhs->Get_result());
+    public:
+        MaxNode(std::shared_ptr<Node> lhs, std::shared_ptr<Node> rhs) : arguments{lhs, rhs} {
+        
+        result = std::max(lhs->Get_result(), rhs->Get_result());
 
             //std::cout << "Constructing class for Max Nodes" << std::endl;
             //std::cout << "Max{" << lhs->Get_result() << ", " << rhs->Get_result() << "} = " << result << std::endl;
@@ -354,10 +343,9 @@ class MaxNode : public Node{
 
 class AddAssignNode : public Node{
     public:
-        AddAssignNode(Node* lhs, Node* rhs){
-            arguments.resize(2);
-            arguments[0] = lhs;
-            arguments[1] = rhs;
+        AddAssignNode(const std::shared_ptr<Node>& lhs, const std::shared_ptr<Node>& rhs){
+            arguments.push_back(lhs);
+            arguments.push_back(rhs);
 
             lhs->Set_result(lhs->Get_result() + rhs->Get_result());
             result = lhs->Get_result();
@@ -377,10 +365,9 @@ class AddAssignNode : public Node{
 
 class MulAssignNode : public Node {
 public:
-    MulAssignNode(Node* lhs, Node* rhs) {
-        arguments.resize(2);
-        arguments[0] = lhs;
-        arguments[1] = rhs;
+    MulAssignNode(const std::shared_ptr<Node>& lhs, const std::shared_ptr<Node>& rhs) {
+        arguments.push_back(lhs);
+        arguments.push_back(rhs);
 
         lhs->Set_result(lhs->Get_result() * rhs->Get_result());
         result = lhs->Get_result();
@@ -399,4 +386,4 @@ public:
 };
 
 
-#endif // NODE_V2_H
+#endif // NODE_v2_H
