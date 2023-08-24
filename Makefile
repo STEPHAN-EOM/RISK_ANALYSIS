@@ -3,7 +3,7 @@ CXXFLAGS = -Wall -Wextra -std=c++17
 
 SOURCE = BSModel.h MCSimulation.h 
 
-all: main main_aad main_mcaad main_pthread main_multiaad
+all: main main_aad main_mcaad main_pthread main_multiaad main_mull
 #######################################################
 MCSimulation.o: MCSimulation.cc MCSimulation.h 
 	$(CXX) $(CXXFLAGS) -o MCSimulation.o -c MCSimulation.cc
@@ -40,7 +40,7 @@ main_mcaad: main_mcaad.o
 	$(CXX) $(CXXFLAGS) -o main_mcaad main_mcaad.o 
 
 main_aad.o: main_aad.cc Node_v1.h Number_v1.h 
-	$(CXX) $(CXXFLAGS) -o main_aad.o -c main_aad.cc 
+	$(CXX) $(CXXFLAGS) -o main_aad.o -c main_aad.cc
 
 main_aad: main_aad.o 
 	$(CXX) $(CXXFLAGS) -o main_aad main_aad.o 
@@ -58,14 +58,20 @@ main_pthread: main_pthread.o MCSimulation_pthread.o
 #	$(CXX) $(CXXFLAGS) -pthread -o main_mcaad_pthread main_mcaad_pthread.o
 
 #main_multiaad.o: main_multiaad.cc Node_v1.h Number_Pthread.h Parallel_aad.h
-main_multiaad.o: main_multiaad.cc Parallel_aad.h Node_v1.h Number_Pthread.h
+main_multiaad.o: main_multiaad.cc Parallel_aad.h Node_v2.h Number_Pthread.h
 	$(CXX) $(CXXFLAGS) -pthread -o main_multiaad.o -c main_multiaad.cc -fsanitize=address
 
 main_multiaad: main_multiaad.o Parallel_aad.o Number_Pthread.o
 	$(CXX) $(CXXFLAGS) -pthread -o main_multiaad main_multiaad.o Parallel_aad.o Number_Pthread.o -fsanitize=address
 
+main_mull.o: main_mull.cc Node_v1.h Number_v2.h
+	$(CXX) $(CXXFLAGS) -pthread -o main_mull.o -c main_mull.cc -fsanitize=address
+
+main_mull: main_mull.o
+	$(CXX) $(CXXFLAGS) -pthread -o main_mull main_mull.o -fsanitize=address
+
 #######################################################
 .Phony: all clean
 
 clean:
-	rm -f *.o main main_aad main_mcaad main_pthread  main_multiaad
+	rm -f *.o main main_aad main_mcaad main_pthread main_multiaad main_mull

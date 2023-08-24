@@ -49,7 +49,6 @@ class Number{
             if (leafNode) {
                 return leafNode->Get_value();
             }
-
             return 0.0;
         }
 

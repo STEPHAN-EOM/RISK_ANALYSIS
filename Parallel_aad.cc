@@ -2,9 +2,9 @@
 
 // Constructor
 template <class T>
-Parallel_AAD<T>::Parallel_AAD(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, double r_dom, int num_step, int num_sim)
-    : spot_p(spot_p), strike_p(strike_p), risk_neutral(risk_neutral), vol(vol), maturity(maturity), 
-    r_dom(r_dom), num_step(num_step), num_sim(num_sim), distribution(0.0, 1.0) {
+Parallel_AAD<T>::Parallel_AAD(T& spot_p, T& strike_p, T& risk_neutral, T& vol, T& maturity, double& r_dom, int& num_step, int& num_sim)
+    : spot_p(spot_p), strike_p(strike_p), risk_neutral(risk_neutral), vol(vol), 
+    maturity(maturity), r_dom(r_dom), num_step(num_step), num_sim(num_sim), distribution(0.0, 1.0) {
 }
 
 // Thread function
@@ -34,6 +34,7 @@ void* Parallel_AAD<T>::ThreadFunction(void* arg) {
     // Combine the local thread's tape into the global tape
     Number::CombineLocalTape();
     std::cout << "Combine the tape" << std::endl;
+    
     return nullptr;
 }
 
@@ -67,18 +68,35 @@ T Parallel_AAD<T>::Parallel_Simulation() {
             threads[i] = 0;
         }
     }
-
+/*
     T total_sum = 0.0;
 
     for (int i = 0; i < NUM_THREADS; ++i) {
+        std::cout << "Tread <" << i << "> join" << std::endl; 
         pthread_join(threads[i], nullptr);
         total_sum += threadData[i].local_sum;
+        std::cout << "Tread <" << i << "> is done" << std::endl; 
     }
     
     T average = total_sum / num_sim;
     T discount = exp(-r_dom);
     T result = average * discount;
+*/
+
     
+    for (int i = 0; i < NUM_THREADS; ++i) {
+        pthread_join(threads[i], nullptr);
+    }
+
+    T total_sum = 0.0;
+    for (int i = 0; i < NUM_THREADS; ++i) {
+        total_sum += threadData[i].local_sum;
+    }
+
+    T average = total_sum / (num_sim / NUM_THREADS);
+    T discount = exp(-r_dom);
+    T result = average * discount;
+ 
     return result;
 }
 

@@ -65,6 +65,8 @@
         "random": "cpp",
         "algorithm": "cpp",
         "list": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "functional": "cpp",
+        "future": "cpp"
     }
 }

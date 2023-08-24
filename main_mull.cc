@@ -4,10 +4,76 @@
 #include <algorithm>
 #include <utility>
 #include <chrono>
+#include <future>
 #include <pthread.h>
 #include <sys/resource.h>
 #include <sys/time.h>
-#include "Parallel_aad.h"
+#include "Number_v2.h"
+
+template <class T>
+T Simulation(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, int num_step, int sim_thread){
+    std::default_random_engine generator;
+    std::normal_distribution<double> distribution(0.0, 1.0);
+
+    T dt = maturity / (365.0 * num_step);
+    T first = (risk_neutral - (0.5 * vol * vol)) * dt;
+    T second = vol * sqrt(dt);
+
+    T local_sum = 0.0;
+    T payoff = 0.0;
+
+    for (int i = 0; i < num_step; ++i){
+        T fx_rate = spot_p;
+
+        for (int j = 0; j < sim_thread; ++j){
+            double rand = distribution(generator);
+            fx_rate *= exp(first * 365) * exp(second * sqrt(365) * rand);
+        }
+
+        payoff = max(fx_rate - strike_p, static_cast<T>(0.0));
+        local_sum += payoff;
+    }
+
+    //std::lock_guard<std::mutex> lock(tape_mutex);
+    //Number::global_tape.insert(Number::global_tape.end(), std::make_move_iterator(tape.begin()), std::make_move_iterator(tape.end()));
+
+    std::lock_guard<std::mutex> guard(Number::tape_mutex);
+    for(auto& node : Number::tape) {
+        //Number::global_tape.push_back(std::move(node));
+        //Number::global_tape.push_back(std::make_unique<Node>(*node)); 
+        //Number::global_tape.push_back(std::unique_ptr<Node>(node.release()));
+        Number::global_tape.push_back(std::move(node));
+    }
+    Number::tape.clear();
+
+    return local_sum;
+}
+
+template <class T>
+T f(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, double r_dom, int num_sim, int num_step){
+    int num_threads = std::thread::hardware_concurrency();  // optimal number of threads
+    std::vector<std::future<T>> futures;
+
+    int sim_thread = num_sim / num_threads;
+    for(int i = 0; i < num_threads; ++i) {
+        futures.push_back(std::async(std::launch::async, Simulation<T>, 
+                        spot_p, strike_p, risk_neutral, vol, maturity, num_step, sim_thread));
+    }
+
+    T total_sum = 0.0;
+    for(auto& fut : futures) {
+        total_sum += fut.get();
+    }
+
+    T average = total_sum / num_sim;
+    T discount = exp(-r_dom);          
+    T result = average * discount;
+
+    result.Propagate_adj();
+
+    return result;
+}
+
 
 int main(){
 
@@ -30,11 +96,11 @@ int main(){
     //Number local_sum = 0.0;
 
     //std::cout << "Done1" << std::endl;
-    Parallel_AAD<Number> Simulation(spot_p, strike_p, risk_neutral, vol, maturity, r_dom, num_step, num_sim); 
+    Number result  = f(spot_p, strike_p, risk_neutral, vol, maturity, r_dom, num_step, num_sim); 
 
     auto start = std::chrono::high_resolution_clock::now();
     //std::cout << "Done2" << std::endl;
-    Number result = Simulation.Parallel_Simulation();
+    //Number result = Simulation.Parallel_Simulation();
     //std::cout << "Done3" << std::endl;
     // Implement the Adjoint Differentiation
 
@@ -82,17 +148,7 @@ int main(){
     for (auto i = 0; i < 20; ++i){
         std::cout << "tape(" << i << ") = " << Number::tape[i]->Get_result() << std::endl;
     }
-/*
 
-    // Clear up
-    for (int t = 0; t < NUM_THREADS; ++t) {
-        if (ThreadData[t]) {
-            delete ThreadData[t];
-            ThreadData[t] = nullptr;  // Set the pointer to nullptr after deletion
-        }
-    }
-
-*/
    if (getrusage(RUSAGE_SELF, &usage) == 0) {
         
         // Calculate user and system CPU times

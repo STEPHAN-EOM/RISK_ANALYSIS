@@ -6,28 +6,26 @@
 #include <vector>
 #include <string>
 #include <optional>
-#include <cmath>
-#include "Node_v2.h"
-
-class Number{
-    std::shared_ptr<Node> mynode;
+#include <mutex>
+#include <thread>
+#include "Node_v1.h"
 /*
-    static void AddToTape(std::unique_ptr<Node> node) {
-        tape.push_back(std::move(node));
-    }
-*/
+class Number{
+    Node* mynode;
+
     public:
 
-        static std::vector<std::shared_ptr<Node>> tape;
+        static std::vector<std::unique_ptr<Node>> global_tape;
+        thread_local static std::vector<std::shared_ptr<Node>> tape;
+        static std::mutex tape_mutex;
 
-        
-        Number(double value) : mynode(std::make_shared<Leaf>(value)) {
-            tape.push_back(mynode);
+        Number(double value) : mynode(new Leaf(value)) {
+            tape.push_back(std::unique_ptr<Node>(mynode));
 
             //std::cout << "Constructing class for Number with Leaf" << std::endl;
         };
 
-        Number(const std::shared_ptr<Node>& node) : mynode(node) {
+        Number(Node* node) : mynode(node) {
             //std::cout << "Constructing class for Number with Node" << std::endl;
         };
 
@@ -35,24 +33,16 @@ class Number{
             //std::cout << "Destroying class for Numbers" << std::endl;
         };
 
-       std::shared_ptr<Node> node(){
+        Node* node(){
             return mynode;
         }
 
         void Set_value(double value){
-             auto leafNode = std::dynamic_pointer_cast<Leaf>(mynode);
-            if (leafNode) {
-                leafNode->Set_value(value);
-            }
+            dynamic_cast<Leaf*>(mynode) -> Set_value(value);
         }
 
         double Get_value() {
-             auto leafNode = std::dynamic_pointer_cast<Leaf>(mynode);
-            if (leafNode) {
-                return leafNode->Get_value();
-            }
-
-            return 0.0;
+            return dynamic_cast<Leaf*>(mynode) -> Get_value();
         }
 
         double& Get_adjoint(){
@@ -64,7 +54,7 @@ class Number{
             mynode -> Get_adjoint() = 1.0;
 
             auto it = tape.rbegin();
-            while (it != tape.rend() && *it != mynode){
+            while (it-> get() != mynode){
                 ++it;
             }
 
@@ -72,10 +62,6 @@ class Number{
                 (*it) -> Propagate_adj();
                 ++it;
             }
-        }
-
-        void setNode(const std::shared_ptr<Node>& newNode) {
-            mynode = newNode;
         }
 
         static void Mark_tape(){
@@ -91,112 +77,288 @@ class Number{
         }
 
     private:
-
+    
         static std::optional<size_t> tapeMark;
         
 };
 
-std::vector<std::shared_ptr<Node>> Number::tape;
+std::vector<std::unique_ptr<Node>> global_tape;
+thread_local static std::vector<std::shared_ptr<Node>> tape;
+std::mutex tape_mutex;
 std::optional<size_t> Number::tapeMark = std::nullopt;
 
-inline Number operator+(Number lhs, Number rhs){
-    std::shared_ptr<Node> n = std::make_shared<AddNode>(lhs.node(), rhs.node());
-    Number::tape.push_back(n);
+Number operator+(Number lhs, Number rhs){
+    Node* n = new AddNode(lhs.node(), rhs.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
 
-    return Number(n);
+    return n;
 }
 
-inline Number operator-(Number lhs, Number rhs){
-    std::shared_ptr<Node> n = std::make_shared<SubNode>(lhs.node(), rhs.node());
-    Number::tape.push_back(n);
+Number operator-(Number lhs, Number rhs){
+    Node* n = new SubNode(lhs.node(), rhs.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
 
-    return Number(n);
+    return n;
 }
 
-inline Number operator*(Number lhs, Number rhs){
-    std::shared_ptr<Node> n = std::make_shared<MulNode>(lhs.node(), rhs.node());
-    Number::tape.push_back(n);
+Number operator*(Number lhs, Number rhs){
+    Node* n = new MulNode(lhs.node(), rhs.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
 
-    return Number(n);
+    return n;
 }
 
-inline Number operator*(Number lhs, double rhs){
-    std::shared_ptr<Node> n = std::make_shared<MulDoubleNode>(lhs.node(), rhs);
-    Number::tape.push_back(n);
+Number operator*(Number lhs, double rhs){
+    Node* n = new MulDoubleNode(lhs.node(), rhs);
+    Number::tape.push_back(std::unique_ptr<Node>(n));
 
-    return Number(n);
+    return n;
 }
 
-inline Number operator/(Number lhs, Number rhs){
-    std::shared_ptr<Node> n = std::make_shared<DivNode>(lhs.node(), rhs.node());
-    Number::tape.push_back(n);
+Number operator/(Number lhs, Number rhs){
+    Node*n = new DivNode(lhs.node(), rhs.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
 
-    return Number(n);
+    return n;
 }
 
-inline Number operator/(Number lhs, double rhs){
-    std::shared_ptr<Node> n = std::make_shared<DivDoubleNode>(lhs.node(), rhs);
-    Number::tape.push_back(n);
+Number operator/(Number lhs, double rhs){
+    Node*n = new DivDoubleNode(lhs.node(), rhs);
+    Number::tape.push_back(std::unique_ptr<Node>(n));
 
-    return Number(n);
+    return n;
 }
 
-inline Number operator-(Number arg){
-    std::shared_ptr<Node> n = std::make_shared<MinusNode>(arg.node());
-    Number::tape.push_back(n);
+Number operator-(Number arg){
+    Node* n = new MinusNode(arg.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
 
-    return Number(n);
+    return n;
 }
 
-inline Number log(Number arg){
-    std::shared_ptr<Node> n = std::make_shared<LogNode>(arg.node());
-    Number::tape.push_back(n);
+Number log(Number arg){
+    Node* n = new LogNode(arg.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
 
-    return Number(n);
+    return n;
 }
 
-inline Number exp(Number arg){
-    std::shared_ptr<Node> n = std::make_shared<ExpNode>(arg.node());
-    Number::tape.push_back(n);
+Number exp(Number arg){
+    Node* n = new ExpNode(arg.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
 
-    return Number(n);
+    return n;
 }
 
-inline Number sqrt(Number arg){
-    std::shared_ptr<Node> n = std::make_shared<SqrtNode>(arg.node());
-    Number::tape.push_back(n);
+Number sqrt(Number arg){
+    Node* n = new SqrtNode(arg.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
 
-    return Number(n);
+    return n;
 }
 
-inline Number N(Number arg){
-    std::shared_ptr<Node> n = std::make_shared<NormalNode>(arg.node());
-    Number::tape.push_back(n);
+Number N(Number arg){
+    Node* n = new NormalNode(arg.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
 
-    return Number(n);
+    return n;
 }
 
-inline Number max(Number lhs, Number rhs) {
-    std::shared_ptr<Node> n = std::make_shared<MaxNode>(lhs.node(), rhs.node());
-    Number::tape.push_back(n);
+Number max(Number lhs, Number rhs) {
+    Node* n = new MaxNode(lhs.node(), rhs.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
 
-    return Number(n);
+    return n;
 }
 
-inline Number& operator+=(Number& lhs, Number rhs) {
-    std::shared_ptr<Node> n = std::make_shared<AddNode>(lhs.node(), rhs.node());
-    Number::tape.push_back(n);
-    lhs.setNode(n);
-
+Number& operator+=(Number& lhs, Number rhs) {
+    Node* n = new AddNode(lhs.node(), rhs.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
+    lhs = n;
     return lhs;
 }
 
-inline Number& operator*=(Number& lhs, Number rhs) {
-    std::shared_ptr<Node> n = std::make_shared<MulNode>(lhs.node(), rhs.node());
-    Number::tape.push_back(n);
-    lhs.setNode(n);
+Number& operator*=(Number& lhs, Number rhs) {
+    Node* n = new MulNode(lhs.node(), rhs.node());
+    Number::tape.push_back(std::unique_ptr<Node>(n));
+    lhs = n;
+    return lhs;
+}
+*/
+class Number{
+    Node* mynode;
+
+    public:
+
+        static std::vector<std::shared_ptr<Node>> global_tape;
+        thread_local static std::vector<std::shared_ptr<Node>> tape;
+        static std::mutex tape_mutex;
+
+        Number(double value) : mynode(new Leaf(value)) {
+            tape.push_back(std::shared_ptr<Node>(mynode));
+
+            //std::cout << "Constructing class for Number with Leaf" << std::endl;
+        };
+
+        Number(Node* node) : mynode(node) {
+            //std::cout << "Constructing class for Number with Node" << std::endl;
+        };
+
+        ~Number(){
+            //std::cout << "Destroying class for Numbers" << std::endl;
+        };
+
+        Node* node(){
+            return mynode;
+        }
+
+        void Set_value(double value){
+            dynamic_cast<Leaf*>(mynode) -> Set_value(value);
+        }
+
+        double Get_value() {
+            return dynamic_cast<Leaf*>(mynode) -> Get_value();
+        }
+
+        double& Get_adjoint(){
+            return mynode -> Get_adjoint();
+        }
+
+        void Propagate_adj(){
+            mynode -> Reset_adjoint();
+            mynode -> Get_adjoint() = 1.0;
+
+            auto it = tape.rbegin();
+            while (it-> get() != mynode){
+                ++it;
+            }
+
+            while (it != tape.rend()){
+                (*it) -> Propagate_adj();
+                ++it;
+            }
+        }
+
+        static void Mark_tape(){
+            tapeMark = tape.size();
+        }
+
+        static void Rewind_Mark(){
+            if(tapeMark.has_value()){
+                //tape.erase(tape.begin() + tapeMark.value(), tape.end());
+                tape.resize(tapeMark.value());
+                tapeMark.reset();
+            }
+        }
+
+    private:
     
+        static std::optional<size_t> tapeMark;
+        
+};
+
+std::vector<std::shared_ptr<Node>> global_tape;
+thread_local static std::vector<std::shared_ptr<Node>> tape;
+std::mutex tape_mutex;
+std::optional<size_t> Number::tapeMark = std::nullopt;
+
+Number operator+(Number lhs, Number rhs){
+    Node* n = new AddNode(lhs.node(), rhs.node());
+    Number::tape.push_back(std::shared_ptr<Node>(n));
+
+    return Number(n);
+}
+
+Number operator-(Number lhs, Number rhs){
+    Node* n = new SubNode(lhs.node(), rhs.node());
+    Number::tape.push_back(std::shared_ptr<Node>(n));
+
+    return Number(n);
+}
+
+Number operator*(Number lhs, Number rhs){
+    Node* n = new MulNode(lhs.node(), rhs.node());
+    Number::tape.push_back(std::shared_ptr<Node>(n));
+
+    return Number(n);
+}
+
+Number operator*(Number lhs, double rhs){
+    Node* n = new MulDoubleNode(lhs.node(), rhs);
+    Number::tape.push_back(std::shared_ptr<Node>(n));
+
+    return Number(n);
+}
+
+Number operator/(Number lhs, Number rhs){
+    Node*n = new DivNode(lhs.node(), rhs.node());
+    Number::tape.push_back(std::shared_ptr<Node>(n));
+
+    return Number(n);
+}
+
+Number operator/(Number lhs, double rhs){
+    Node*n = new DivDoubleNode(lhs.node(), rhs);
+    Number::tape.push_back(std::shared_ptr<Node>(n));
+
+    return Number(n);
+}
+
+Number operator-(Number arg){
+    Node* n = new MinusNode(arg.node());
+    Number::tape.push_back(std::shared_ptr<Node>(n));
+
+    return Number(n);
+}
+
+Number log(Number arg){
+    Node* n = new LogNode(arg.node());
+    Number::tape.push_back(std::shared_ptr<Node>(n));
+
+    return Number(n);
+}
+
+Number exp(Number arg){
+    Node* n = new ExpNode(arg.node());
+    Number::tape.push_back(std::shared_ptr<Node>(n));
+
+    return Number(n);
+}
+
+Number sqrt(Number arg){
+    Node* n = new SqrtNode(arg.node());
+    Number::tape.push_back(std::shared_ptr<Node>(n));
+
+    return Number(n);
+}
+
+Number N(Number arg){
+    Node* n = new NormalNode(arg.node());
+    Number::tape.push_back(std::shared_ptr<Node>(n));
+
+    return Number(n);
+}
+
+Number max(Number lhs, Number rhs) {
+    Node* n = new MaxNode(lhs.node(), rhs.node());
+    Number::tape.push_back(std::shared_ptr<Node>(n));
+
+    return Number(n);
+}
+
+Number& operator+=(Number& lhs, Number rhs) {
+    Node* n = new AddNode(lhs.node(), rhs.node());
+    Number::tape.push_back(std::shared_ptr<Node>(n));
+    lhs = n;
     return lhs;
 }
 
-#endif // NUMBER_V2_H
+Number& operator*=(Number& lhs, Number rhs) {
+    Node* n = new MulNode(lhs.node(), rhs.node());
+    Number::tape.push_back(std::shared_ptr<Node>(n));
+    lhs = n;
+    return lhs;
+}
+
+
+#endif // NUMBER_V1_H

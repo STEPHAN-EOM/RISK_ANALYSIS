@@ -13,7 +13,7 @@
 template <class T>
 class Parallel_AAD {
 public:
-    Parallel_AAD(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, double r_dom, int num_step, int num_sim);
+    Parallel_AAD(T& spot_p, T& strike_p, T& risk_neutral, T& vol, T& maturity, double& r_dom, int& num_step, int& num_sim);
     ~Parallel_AAD(){};
 
     T Parallel_Simulation();

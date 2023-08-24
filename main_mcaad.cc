@@ -15,8 +15,6 @@ T f(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, double r_dom, int n
     std::default_random_engine generator;
     std::normal_distribution<double> distribution(0.0, 1.0);
 
-    //double divide = 365.0 * num_step;
-    //T dt = maturity / divide;
     T dt = maturity / (365.0 * num_step);
     T first = (risk_neutral - (0.5 * vol * vol)) * dt;
     T second = vol * sqrt(dt);
@@ -25,7 +23,6 @@ T f(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, double r_dom, int n
     T sum_op = 0.0;
     T payoff = 0.0;
 
-    //Number::Mark_tape();
 
     for (int i = 0; i < num_sim; ++i){
         T fx_rate = spot_p;
@@ -36,17 +33,13 @@ T f(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, double r_dom, int n
         }
 
         payoff = max(fx_rate - strike_p, 0.0);
-        //payoff = std::max(fx_rate - strike_p, 0.0);
 
-        //sum_fx += fx_rate;
         sum_op += payoff;
     }
 
-    //T average_fx = sum_fx / num_sim;
     T average_op = sum_op / num_sim;
     T discount = exp(-r_dom);          // Discount by Domestic Interest Rate
 
-    //T result_fx = average_fx * discount;
     T result_op = average_op * discount;
 
 /*
@@ -64,8 +57,6 @@ T f(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, double r_dom, int n
 */
 
     // Record the intermediate results in the local tape
-    //Number::tape.push_back(std::make_unique<Leaf>(result_fx.Get_value()));
-    //Number::tape.push_back(std::make_unique<Leaf>(result_op.Get_value()));
     return result_op;
 }
 
