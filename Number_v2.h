@@ -219,7 +219,11 @@ class Number{
         double Get_value() {
             return dynamic_cast<Leaf*>(mynode) -> Get_value();
         }
-
+/*
+        void Set_adjoint(double value) {
+            mynode -> Set_adjoint(value);
+        }
+*/
         double& Get_adjoint(){
             return mynode -> Get_adjoint();
         }
@@ -258,7 +262,7 @@ class Number{
 };
 
 std::vector<std::shared_ptr<Node>> global_tape;
-thread_local static std::vector<std::shared_ptr<Node>> tape;
+thread_local std::vector<std::shared_ptr<Node>> tape;
 std::mutex tape_mutex;
 std::optional<size_t> Number::tapeMark = std::nullopt;
 

@@ -10,6 +10,10 @@
 #include <sys/time.h>
 #include "Number_v2.h"
 
+std::mutex Number::tape_mutex;
+std::vector<std::shared_ptr<Node>> Number::global_tape;
+thread_local std::vector<std::shared_ptr<Node>> Number::tape;
+
 template <class T>
 T Simulation(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, int num_step, int sim_thread){
     std::default_random_engine generator;
@@ -33,43 +37,60 @@ T Simulation(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, int num_st
         payoff = max(fx_rate - strike_p, static_cast<T>(0.0));
         local_sum += payoff;
     }
+    int t = Number::tape.size();
 
-    //std::lock_guard<std::mutex> lock(tape_mutex);
+    std::cout << "The number of tape size is " << t << std::endl;
+
+    std::lock_guard<std::mutex> lock(Number::tape_mutex);
     //Number::global_tape.insert(Number::global_tape.end(), std::make_move_iterator(tape.begin()), std::make_move_iterator(tape.end()));
 
-    std::lock_guard<std::mutex> guard(Number::tape_mutex);
+    //std::lock_guard<std::mutex> guard(Number::tape_mutex);
     for(auto& node : Number::tape) {
         //Number::global_tape.push_back(std::move(node));
         //Number::global_tape.push_back(std::make_unique<Node>(*node)); 
         //Number::global_tape.push_back(std::unique_ptr<Node>(node.release()));
         Number::global_tape.push_back(std::move(node));
     }
-    Number::tape.clear();
 
+    Number::tape.clear();
+    
     return local_sum;
 }
 
 template <class T>
 T f(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, double r_dom, int num_sim, int num_step){
-    int num_threads = std::thread::hardware_concurrency();  // optimal number of threads
+    //int num_threads = std::thread::hardware_concurrency();  // optimal number of threads
+    int num_threads = 4;
     std::vector<std::future<T>> futures;
 
     int sim_thread = num_sim / num_threads;
+
     for(int i = 0; i < num_threads; ++i) {
         futures.push_back(std::async(std::launch::async, Simulation<T>, 
                         spot_p, strike_p, risk_neutral, vol, maturity, num_step, sim_thread));
-    }
 
+    }
+   
     T total_sum = 0.0;
     for(auto& fut : futures) {
         total_sum += fut.get();
     }
-
     T average = total_sum / num_sim;
     T discount = exp(-r_dom);          
     T result = average * discount;
 
-    result.Propagate_adj();
+    //result.Set_adjoint(1.0);
+
+
+    int t = Number::global_tape.size();
+
+    std::cout << "The number of global tape size is " << t << std::endl;
+
+    for (int i = global_tape.size() - 1; i >= 0; --i) {
+        global_tape[i]->Propagate_adj();
+    }
+
+    //result.Propagate_adj();
 
     return result;
 }
@@ -90,28 +111,24 @@ int main(){
     double r_dom = 0.035;
 
     //const int NUM_THREADS = 4;
-    int num_sim = 10000;
+    int num_sim = 100000;
     int num_step = 5;
 
     //Number local_sum = 0.0;
-
+   auto start = std::chrono::high_resolution_clock::now();
     //std::cout << "Done1" << std::endl;
     Number result  = f(spot_p, strike_p, risk_neutral, vol, maturity, r_dom, num_step, num_sim); 
 
-    auto start = std::chrono::high_resolution_clock::now();
-    //std::cout << "Done2" << std::endl;
-    //Number result = Simulation.Parallel_Simulation();
-    //std::cout << "Done3" << std::endl;
-    // Implement the Adjoint Differentiation
+ 
 
-    int t = Number::tape.size();
+    int t = Number::global_tape.size();
 
-    std::cout << "The number of tape size is" << t << std::endl;
+    std::cout << "The number of Global tape size is " << t << std::endl;
     
-/*
-    result.Propagate_adj();
-    std::cout << "Done4" << std::endl;
 
+    //global_tape.Propagate_adj();
+
+/*
     Number::Mark_tape();
 
     const int repeat_count = 0; // or whatever number of repetitions you need
@@ -145,9 +162,11 @@ int main(){
     std::cout << "\n========== Print out the values saved onto the tape(whose size = " << tape_size << ") ==========" << std::endl;
     std::cout << "Result is " << Number::tape[tape_size-1]->Get_result() << std::endl;
 
-    for (auto i = 0; i < 20; ++i){
-        std::cout << "tape(" << i << ") = " << Number::tape[i]->Get_result() << std::endl;
-    }
+    if (!Number::tape.empty()) {
+   std::cout << "Result is " << Number::tape[tape_size-1]->Get_result() << std::endl;
+} else {
+   std::cout << "Tape is empty." << std::endl;
+}
 
    if (getrusage(RUSAGE_SELF, &usage) == 0) {
         

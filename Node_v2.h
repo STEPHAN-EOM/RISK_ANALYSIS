@@ -36,6 +36,10 @@ class Node {
             result = value;
         }
 
+        void Set_adjoint(double value) {
+            adjoint = value;
+        }
+
         void Reset_adjoint(){
             for (auto i : arguments) i -> Reset_adjoint();
             adjoint = 0.0;
