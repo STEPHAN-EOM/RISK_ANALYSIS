@@ -122,11 +122,11 @@ int main(){
     // Print out the values recorded on the tape
     std::cout << "\n========== Print out the values saved onto the tape(whose size = " << t << ") ==========" << std::endl;
     std::cout << "Result is " << Number::tape[t-1]->Get_result() << std::endl;
-/*
+
     for (auto i = 0; i < 30; ++i){
         std::cout << "tape(" << i << ") = " << Number::tape[i]->Get_result() << std::endl;
     }
-*/
+
 
     if (getrusage(RUSAGE_SELF, &usage) == 0) {
         

@@ -32,6 +32,10 @@ class Node {
             return adjoint;
         }
 
+        void Set_adjoint(double value) {
+           adjoint = value;
+        }
+
         void Set_result(double value) {
             result = value;
         }
@@ -79,7 +83,7 @@ class SubNode : public Node{
             result = lhs->Get_result() - rhs->Get_result();
 
             //std::cout << "Constructing class for Subtracting Nodes" << std::endl;
-            //std::cout << lhs->Get_result() << " - " << rhs->Get_result() << " = " << result << std::endl;
+            std::cout << lhs->Get_result() << " - " << rhs->Get_result() << " = " << result << std::endl;
         };
 
         ~SubNode(){
@@ -336,7 +340,7 @@ class MaxNode : public Node{
             result = std::max(lhs->Get_result(), rhs->Get_result());
 
             //std::cout << "Constructing class for Max Nodes" << std::endl;
-            //std::cout << "Max{" << lhs->Get_result() << ", " << rhs->Get_result() << "} = " << result << std::endl;
+            std::cout << "Max{" << lhs->Get_result() << ", " << rhs->Get_result() << "} = " << result << std::endl;
         };
 
         ~MaxNode(){
