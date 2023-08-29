@@ -73,20 +73,21 @@ int main(){
     Number vol = 0.15;
     Number maturity = 1.0;
     double r_dom = 0.035;
-    int num_sim = 100000;
+    int num_sim = 10000;
     int num_step = 5;
 
     auto start = std::chrono::high_resolution_clock::now();
     // Templated function for the Black-Scholes Fomula
     Number MC_Simulation = f(spot_p, strike_p, risk_neutral, vol, maturity, r_dom, num_sim, num_step);
-
+    
+    Number::Mark_tape();
     // Implement the Adjoint Differentiation
     MC_Simulation.Propagate_adj();
 
 
-    Number::Mark_tape();
+    //Number::Mark_tape();
 
-    const int repeat_count = 9; // or whatever number of repetitions you need
+    const int repeat_count = 5; // or whatever number of repetitions you need
 
     for (int i = 0; i < repeat_count; ++i) {
         // Rewind the tape to the state just after adjoint initialization

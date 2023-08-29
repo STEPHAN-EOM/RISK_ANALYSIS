@@ -38,9 +38,12 @@ std::pair<T, T> MCSimulation<T>::MC_Simulation(T K, int num_step) {
     pthread_t threads[NUM_THREADS];
     ThreadData threadData[NUM_THREADS];
 
+    std::default_random_engine master_generator;
+
     for (int i = 0; i < NUM_THREADS; ++i) {
-         threadData[i] = {fx_initial, fx_vol, r_dom, r_foreign, maturity, K, num_step, num_sim / NUM_THREADS, 
-                        0.0, 0.0, std::default_random_engine(i), std::normal_distribution<double>(0.0, 1.0)
+        std::default_random_engine thread_generator(master_generator());
+        threadData[i] = {fx_initial, fx_vol, r_dom, r_foreign, maturity, K, num_step, num_sim / NUM_THREADS, 
+                        0.0, 0.0, thread_generator, std::normal_distribution<double>(0.0, 1.0)
         };
         pthread_create(&threads[i], nullptr, threadFunction, &threadData[i]);
     }

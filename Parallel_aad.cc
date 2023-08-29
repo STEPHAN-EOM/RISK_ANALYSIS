@@ -32,8 +32,17 @@ void* Parallel_AAD<T>::ThreadFunction(void* arg) {
     }
 
     // Combine the local thread's tape into the global tape
-    Number::CombineLocalTape();
-    std::cout << "Combine the tape" << std::endl;
+    std::cout << "Start Data" << std::endl;
+    for (const auto& node : Number::local_tape) {
+        std::cout << "Result is of "<< std::this_thread::get_id() << "is " << node->Get_result() << " <<==" << std::endl;
+    }
+
+    std::lock_guard<std::mutex> lock(Number::tape_mutex);
+
+    for(auto& node : Number::local_tape) {
+        Number::tape.push_back(std::move(node));
+    }
+    Number::local_tape.clear();
     
     return nullptr;
 }
