@@ -17,7 +17,7 @@ int main(){
     double r_dom = 0.035;		    // Domestic interest rate (Korea, 8-June-2023)
     double r_foreign = 0.0525; 	    // Foreign interest rate(USA, 8-June-2023)
 
-    int num_sims = 10000;          // Number of Simulations
+    int num_sims = 1000000;          // Number of Simulations
     double T = 1.0;                 // Maturity(Year)
     double eps = 0.001;             // Epsilon
     
@@ -25,7 +25,7 @@ int main(){
 
     // Create Monte-Carlo simulation Object
     MCSimulation FX_simulator(fx_initial, fx_vol, r_dom, r_foreign, num_sims, T);           // Base Model
-     auto end = std::chrono::high_resolution_clock::now();
+    //auto end = std::chrono::high_resolution_clock::now();
     MCSimulation FX_simulator1(fx_initial + eps, fx_vol, r_dom, r_foreign, num_sims, T);    // For Sensitivity, Delta
     MCSimulation FX_simulator2(fx_initial, fx_vol + eps, r_dom, r_foreign, num_sims, T);    // For Sensitivity, Vega
     MCSimulation FX_simulator3(fx_initial, fx_vol, r_dom, r_foreign + eps, num_sims, T);
@@ -53,7 +53,7 @@ int main(){
     double theta_bump = (Option_result4.second - FX_result.second) / eps;
     double strike_bump = (Option_result5.second - Option_result1.second) / eps;
 
-   // auto end = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
 
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
@@ -69,7 +69,7 @@ int main(){
     std::cout << "Simulation Result(Option_wrt Strike Price): " << strike_bump << std::endl;
 
     std::cout << "\nTime taken by MC Simulation for 5 sensitivities: " << duration << " milliseconds" << std::endl;
-/*
+
     // Step.4 Black-Scholes Fomular for FX Option
     double spot_p = 1295.0;
     double strike_p = 1300.0;
@@ -129,7 +129,7 @@ int main(){
     std::cout << "Theta: " << theta1 << "\n";
     std::cout << "Vega: " << vega1 << "\n";
     std::cout << "Rho: " << rho1 << "\n";
-*/
+
     if (getrusage(RUSAGE_SELF, &usage) == 0) {
         
         // Calculate user and system CPU times
@@ -140,7 +140,7 @@ int main(){
         std::cout << "System CPU time: " << systemTime << " seconds" << std::endl;
 
         // If you want to print memory as well
-        std::cout << "Max memory used (KB): " << usage.ru_maxrss << std::endl;
+        std::cout << "Max memory used (KB): " << usage.ru_maxrss / 1024 << std::endl;
 
     } else {
         std::cerr << "Error retrieving usage information." << std::endl;

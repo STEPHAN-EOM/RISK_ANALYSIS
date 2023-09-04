@@ -6,16 +6,19 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <stack>
+#include <set>
+#include <unordered_set>
 
 class Node {
     protected:
         std::vector<Node*> arguments;
 
-        double result;
+        double result = 0.0;
         double adjoint = 0.0;
 
     public:
-
+/*
         Node(){
             //std::cout << "Constructing the Node" << std::endl;
         }
@@ -23,6 +26,11 @@ class Node {
         virtual ~Node(){
             //std::cout << "Destroying the Node" << std::endl;
         };
+*/
+        Node() = default; 
+
+        virtual ~Node() = default; 
+
 
         double Get_result(){
             return result;
@@ -39,11 +47,36 @@ class Node {
         void Set_result(double value) {
             result = value;
         }
-
+/*
         void Reset_adjoint(){
             for (auto i : arguments) i -> Reset_adjoint();
             adjoint = 0.0;
         }
+*/
+
+
+        void Reset_adjoint() {
+    std::stack<Node*> nodeStack;
+    std::unordered_set<Node*> visitedNodes;
+
+    nodeStack.push(this);
+
+    while (!nodeStack.empty()) {
+        Node* currentNode = nodeStack.top();
+        nodeStack.pop();
+
+        if (visitedNodes.find(currentNode) == visitedNodes.end()) {
+            visitedNodes.insert(currentNode);
+            
+            for (auto i : currentNode->arguments) {
+                nodeStack.push(i);
+            }
+            
+            currentNode->adjoint = 0.0;
+        }
+    }
+}
+
 
         virtual void Propagate_adj() = 0;
 

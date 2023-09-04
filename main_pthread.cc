@@ -16,7 +16,7 @@ int main() {
     double r_dom = 0.035;		    // Domestic interest rate (Korea, 8-June-2023)
     double r_foreign = 0.0525; 	    // Foreign interest rate(USA, 8-June-2023)
 
-    int num_sims = 100000;          // Number of Simulations
+    int num_sims = 500000;          // Number of Simulations
     double T = 1.0;                 // Maturity(Year)
     double eps = 0.001;             // Epsilon
     
@@ -78,7 +78,7 @@ int main() {
         std::cout << "System CPU time: " << systemTime << " seconds" << std::endl;
 
         // If you want to print memory as well
-        std::cout << "Max memory used (KB): " << usage.ru_maxrss << std::endl;
+        std::cout << "Max memory used (KB): " << usage.ru_maxrss / 1024 << std::endl;
 
     } else {
         std::cerr << "Error retrieving usage information." << std::endl;

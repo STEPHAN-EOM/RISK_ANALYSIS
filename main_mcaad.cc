@@ -73,7 +73,7 @@ int main(){
     Number vol = 0.15;
     Number maturity = 1.0;
     double r_dom = 0.035;
-    int num_sim = 10000;
+    int num_sim = 100000;
     int num_step = 5;
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -87,7 +87,7 @@ int main(){
 
     //Number::Mark_tape();
 
-    const int repeat_count = 5; // or whatever number of repetitions you need
+    const int repeat_count = 9; // or whatever number of repetitions you need
 
     for (int i = 0; i < repeat_count; ++i) {
         // Rewind the tape to the state just after adjoint initialization
@@ -139,7 +139,7 @@ int main(){
         std::cout << "System CPU time: " << systemTime << " seconds" << std::endl;
 
         // If you want to print memory as well
-        std::cout << "Max memory used (KB): " << usage.ru_maxrss << std::endl;
+        std::cout << "Max memory used (KB): " << usage.ru_maxrss  / 1024 << std::endl;
 
     } else {
         std::cerr << "Error retrieving usage information." << std::endl;

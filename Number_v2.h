@@ -229,7 +229,7 @@ class Number{
 
         Number(double value) : mynode(new Leaf(value)) {
             std::lock_guard<std::mutex> lock(tape_mutex);
-            tape.push_back(std::unique_ptr<Node>(mynode));
+            //tape.push_back(std::unique_ptr<Node>(mynode));
             global_tape.push_back(std::unique_ptr<Node>(mynode));
 
             //std::cout << "Constructing class for Number with Leaf" << std::endl;
@@ -273,7 +273,7 @@ class Number{
                 std::cout << node.get() << " ";
             }
             */
-            std::cout << std::endl;
+            //std::cout << std::endl;
 
             //std::cout << "Back-Propagation is starting" <<std::endl;
             mynode -> Reset_adjoint();
@@ -328,7 +328,7 @@ Number operator+(Number lhs, Number rhs){
     Node* n = new AddNode(lhs.node(), rhs.node());
     //Number::tape.push_back(std::unique_ptr<Node>(n));
     std::lock_guard<std::mutex> lock(Number::tape_mutex);
-    Number::tape.push_back(std::unique_ptr<Node>(n));
+    //Number::tape.push_back(std::unique_ptr<Node>(n));
     Number::global_tape.push_back(std::unique_ptr<Node>(n));
 
     //std::cout << "Added new MulNode to tape" << lhs.Get_result() << " & "<< rhs.Get_result() <<std::endl;
@@ -340,7 +340,7 @@ Number operator-(Number lhs, Number rhs){
     Node* n = new SubNode(lhs.node(), rhs.node());
     //Number::tape.push_back(std::unique_ptr<Node>(n));
  std::lock_guard<std::mutex> lock(Number::tape_mutex);
-    Number::tape.push_back(std::unique_ptr<Node>(n));
+    //Number::tape.push_back(std::unique_ptr<Node>(n));
     Number::global_tape.push_back(std::unique_ptr<Node>(n));
     return n;
 }
@@ -349,7 +349,7 @@ Number operator*(Number lhs, Number rhs){
     Node* n = new MulNode(lhs.node(), rhs.node());
    // Number::tape.push_back(std::unique_ptr<Node>(n));
  std::lock_guard<std::mutex> lock(Number::tape_mutex);
-    Number::tape.push_back(std::unique_ptr<Node>(n));
+    //Number::tape.push_back(std::unique_ptr<Node>(n));
     Number::global_tape.push_back(std::unique_ptr<Node>(n));
     return n;
 }
@@ -358,7 +358,7 @@ Number operator*(Number lhs, double rhs){
     Node* n = new MulDoubleNode(lhs.node(), rhs);
    // Number::tape.push_back(std::unique_ptr<Node>(n));
  std::lock_guard<std::mutex> lock(Number::tape_mutex);
-    Number::tape.push_back(std::unique_ptr<Node>(n));
+    //Number::tape.push_back(std::unique_ptr<Node>(n));
     Number::global_tape.push_back(std::unique_ptr<Node>(n));
     //std::cout << "Added new MulNode to tape" << &lhs << " & "<< rhs <<std::endl;
 
@@ -369,7 +369,7 @@ Number operator/(Number lhs, Number rhs){
     Node*n = new DivNode(lhs.node(), rhs.node());
    // Number::tape.push_back(std::unique_ptr<Node>(n));
  std::lock_guard<std::mutex> lock(Number::tape_mutex);
-    Number::tape.push_back(std::unique_ptr<Node>(n));
+    //Number::tape.push_back(std::unique_ptr<Node>(n));
     Number::global_tape.push_back(std::unique_ptr<Node>(n));
     return n;
 }
@@ -378,7 +378,7 @@ Number operator/(Number lhs, double rhs){
     Node*n = new DivDoubleNode(lhs.node(), rhs);
     //Number::tape.push_back(std::unique_ptr<Node>(n));
  std::lock_guard<std::mutex> lock(Number::tape_mutex);
-    Number::tape.push_back(std::unique_ptr<Node>(n));
+   // Number::tape.push_back(std::unique_ptr<Node>(n));
     Number::global_tape.push_back(std::unique_ptr<Node>(n));
     return n;
 }
@@ -387,7 +387,7 @@ Number operator-(Number arg){
     Node* n = new MinusNode(arg.node());
    // Number::tape.push_back(std::unique_ptr<Node>(n));
  std::lock_guard<std::mutex> lock(Number::tape_mutex);
-    Number::tape.push_back(std::unique_ptr<Node>(n));
+   // Number::tape.push_back(std::unique_ptr<Node>(n));
     Number::global_tape.push_back(std::unique_ptr<Node>(n));
     return n;
 }
@@ -396,7 +396,7 @@ Number log(Number arg){
     Node* n = new LogNode(arg.node());
     //Number::tape.push_back(std::unique_ptr<Node>(n));
  std::lock_guard<std::mutex> lock(Number::tape_mutex);
-    Number::tape.push_back(std::unique_ptr<Node>(n));
+   // Number::tape.push_back(std::unique_ptr<Node>(n));
     Number::global_tape.push_back(std::unique_ptr<Node>(n));
     return n;
 }
@@ -405,7 +405,7 @@ Number exp(Number arg){
     Node* n = new ExpNode(arg.node());
    // Number::tape.push_back(std::unique_ptr<Node>(n));
  std::lock_guard<std::mutex> lock(Number::tape_mutex);
-    Number::tape.push_back(std::unique_ptr<Node>(n));
+   // Number::tape.push_back(std::unique_ptr<Node>(n));
     Number::global_tape.push_back(std::unique_ptr<Node>(n));
     return n;
 }
@@ -414,7 +414,7 @@ Number sqrt(Number arg){
     Node* n = new SqrtNode(arg.node());
     //Number::tape.push_back(std::unique_ptr<Node>(n));
  std::lock_guard<std::mutex> lock(Number::tape_mutex);
-    Number::tape.push_back(std::unique_ptr<Node>(n));
+   //Number::tape.push_back(std::unique_ptr<Node>(n));
     Number::global_tape.push_back(std::unique_ptr<Node>(n));
     return n;
 }
@@ -423,7 +423,7 @@ Number N(Number arg){
     Node* n = new NormalNode(arg.node());
     //Number::tape.push_back(std::unique_ptr<Node>(n));
  std::lock_guard<std::mutex> lock(Number::tape_mutex);
-    Number::tape.push_back(std::unique_ptr<Node>(n));
+   // Number::tape.push_back(std::unique_ptr<Node>(n));
     Number::global_tape.push_back(std::unique_ptr<Node>(n));
     return n;
 }
@@ -432,7 +432,7 @@ Number max(Number lhs, Number rhs) {
     Node* n = new MaxNode(lhs.node(), rhs.node());
    // Number::tape.push_back(std::unique_ptr<Node>(n));
  std::lock_guard<std::mutex> lock(Number::tape_mutex);
-    Number::tape.push_back(std::unique_ptr<Node>(n));
+   // Number::tape.push_back(std::unique_ptr<Node>(n));
     Number::global_tape.push_back(std::unique_ptr<Node>(n));
     return n;
 }
@@ -441,7 +441,7 @@ Number operator+=(Number& lhs, Number rhs) {
     Node* n = new AddAssignNode(lhs.node(), rhs.node());
     //Number::tape.push_back(std::unique_ptr<Node>(n));
      std::lock_guard<std::mutex> lock(Number::tape_mutex);
-    Number::tape.push_back(std::unique_ptr<Node>(n));
+    //Number::tape.push_back(std::unique_ptr<Node>(n));
     Number::global_tape.push_back(std::unique_ptr<Node>(n));
     lhs = n;
     return lhs;
@@ -450,8 +450,8 @@ Number operator+=(Number& lhs, Number rhs) {
 Number operator*=(Number& lhs, Number rhs) {
     Node* n = new MulAssignNode(lhs.node(), rhs.node());
     //Number::tape.push_back(std::unique_ptr<Node>(n));
-     std::lock_guard<std::mutex> lock(Number::tape_mutex);
-    Number::tape.push_back(std::unique_ptr<Node>(n));
+    std::lock_guard<std::mutex> lock(Number::tape_mutex);
+   // Number::tape.push_back(std::unique_ptr<Node>(n));
     Number::global_tape.push_back(std::unique_ptr<Node>(n));
     lhs = n;
     return lhs;

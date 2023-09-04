@@ -67,6 +67,11 @@
         "list": "cpp",
         "thread": "cpp",
         "functional": "cpp",
-        "future": "cpp"
+        "future": "cpp",
+        "deque": "cpp",
+        "stack": "cpp",
+        "unordered_set": "cpp",
+        "__tree": "cpp",
+        "set": "cpp"
     }
 }
