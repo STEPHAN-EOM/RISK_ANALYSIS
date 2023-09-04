@@ -11,41 +11,6 @@ std::mutex Number::tape_mutex;
 std::vector<std::unique_ptr<Node>> Number::global_tape;
 thread_local std::vector<std::unique_ptr<Node>> Number::tape;
 
-/*
-template <class T>
-T Simulation(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, int num_step, int sim_thread){
-    std::default_random_engine generator;
-    std::normal_distribution<double> distribution(0.0, 1.0);
-
-    T a = spot_p *1;
-     a += strike_p;
-    T result = a * risk_neutral; 
-   
-    std::cout << "Thread ID: " << std::this_thread::get_id() << std::endl;
-    std::cout << "The number of tape size is " << Number::tape.size() << std::endl;
-
-    std::cout << "Start Data Transferring" << std::endl;
-
-
-
-{
-std::lock_guard<std::mutex> lock(Number::tape_mutex);
-
-for (auto& node : Number::tape) {
-// Move the unique_ptr to the global tape
-//std::cout << "Adding mynode to global_tape, address: " << node.get() << std::endl;
-Number::global_tape.push_back(std::move(node));
-}
-
-}
-std::cout << "Data Transfer is done" << std::endl;
-Number::tape.clear();  // Clear the thread-local tape
-
-    return result;
-    //return local_sum;
-}
-*/
-
 std::mutex rng_mutex; // Mutex to protect the random number generator
 std::default_random_engine generator; // Global random number generator
 
@@ -78,9 +43,7 @@ T Simulation(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, int num_st
         local_sum += payoff;
     } 
 
-    //T result = local_sum / static_cast<T>(sim_thread);
-   
-    //std::cout << "Thread ID: " << std::this_thread::get_id() << std::endl;
+    std::cout << "Thread ID: " << std::this_thread::get_id() << std::endl;
     //std::cout << "The number of tape size is " << Number::tape.size() << std::endl;
 
 //    std::cout << "Start Data Transferring" << std::endl;
@@ -106,7 +69,7 @@ Number::tape.clear();  // Clear the thread-local tape
 
 template <class T>
 T f(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, double r_dom, int num_sim, int num_step){
-    int num_threads = 2;
+    int num_threads = 8;
     std::vector<std::future<T>> futures;
 
     int sim_thread = num_sim / num_threads;
