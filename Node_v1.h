@@ -48,13 +48,14 @@ class Node {
             result = value;
         }
 /*
+// Except for Parallel with AAD using 1-3 threads, Use the following "Reset_adjoint"
         void Reset_adjoint(){
             for (auto i : arguments) i -> Reset_adjoint();
             adjoint = 0.0;
         }
 */
 
-
+// Only for Parallel with AAD using 1-3 threads, Use the following "Reset_adjoint"
         void Reset_adjoint() {
     std::stack<Node*> nodeStack;
     std::unordered_set<Node*> visitedNodes;

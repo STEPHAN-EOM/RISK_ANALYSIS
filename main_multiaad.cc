@@ -36,7 +36,6 @@ T Simulation(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, int num_st
             } // Mutex is unlocked here when lock goes out of scope
 
             fx_rate *= exp(first * 365) * exp(second * sqrt(365) * rand);
-            //fx_rate *= exp(first) * exp(second * rand);
         }
 
         payoff = max(fx_rate - strike_p, static_cast<T>(0.0));
@@ -44,7 +43,6 @@ T Simulation(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, int num_st
     } 
 
     std::cout << "Thread ID: " << std::this_thread::get_id() << std::endl;
-    //std::cout << "The number of tape size is " << Number::tape.size() << std::endl;
 
 //    std::cout << "Start Data Transferring" << std::endl;
 /*
@@ -52,7 +50,7 @@ T Simulation(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, int num_st
 std::lock_guard<std::mutex> lock(Number::tape_mutex);
 
 for (auto& node : Number::tape) {
-// Move the unique_ptr to the global tape
+// Move the data from the local tape to the global tape
 //std::cout << "Adding mynode to global_tape, address: " << node.get() << std::endl;
 Number::global_tape.push_back(std::move(node));
 }
@@ -91,8 +89,6 @@ T f(T spot_p, T strike_p, T risk_neutral, T vol, T maturity, double r_dom, int n
 
     //std::cout << "The number of Global tape size is " << Number::global_tape.size() << std::endl;
 
-    //result.Propagate_adj();
-
     return result;
 }
 
@@ -112,17 +108,14 @@ int main(){
     Number maturity = 1.0;
     double r_dom = 0.035;
 
-    //const int NUM_THREADS = 4;
     int num_sim = 50000;
     int num_step = 5;
 
     //Number local_sum = 0.0;
     auto start = std::chrono::high_resolution_clock::now();
-    //std::cout << "Done1" << std::endl;
     Number result  = f(spot_p, strike_p, risk_neutral, vol, maturity, r_dom, num_sim, num_step); 
     
     Number::Mark_tape();
-    //Number::global_tape[5]->Set_result(1);
     result.Propagate_adj();
 
    
@@ -142,15 +135,15 @@ int main(){
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     std::cout << "Time taken by MC Simulation with AAD: " << duration << " milliseconds" << std::endl;
 
- //std::cout << "Hello" << std::endl;
     //int size =  Number::global_tape.size();
+/*   
     // Print out the values recorded on the tape
     std::cout << "\n========== Print out the values saved onto the tape(whose size = " << Number::global_tape.size() << ") ==========" << std::endl;
    for (int i = 0; i < 40; i++){
     //for (int i = 0; i < size; i++){
     std::cout << "Global Tape[" << i  <<"] = " << Number::global_tape[i]->Get_result() << std::endl;
     }
-
+*/
 
     // Print out the result of AAD
     std::cout << "\n========== Print out the result of AAD(The Greek Letters) ==========" << std::endl;
@@ -161,7 +154,6 @@ int main(){
 
 
     int tape_size = Number::global_tape.size();
-
 
     // Print out the values recorded on the tape
     std::cout << "\n========== Print out the values saved onto the tape(whose size = " << tape_size << ") ==========" << std::endl;

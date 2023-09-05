@@ -73,7 +73,7 @@ int main(){
     Number vol = 0.15;
     Number maturity = 1.0;
     double r_dom = 0.035;
-    int num_sim = 100000;
+    int num_sim = 10000;
     int num_step = 5;
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -87,7 +87,7 @@ int main(){
 
     //Number::Mark_tape();
 
-    const int repeat_count = 9; // or whatever number of repetitions you need
+    const int repeat_count = 3; // or whatever number of repetitions you need
 
     for (int i = 0; i < repeat_count; ++i) {
         // Rewind the tape to the state just after adjoint initialization
@@ -101,13 +101,6 @@ int main(){
 
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     std::cout << "Time taken by MC Simulation with AAD: " << duration << " milliseconds" << std::endl;
-
-    // Templated function for the Black-Scholes Fomula
-    //MCSimulation<Number> Cal_Sensitivities(spot_p, r_dom, risk_neutral, vol, maturity, num_sim);
-    //Number result = Cal_Sensitivities.MC_Simulation(strike_p, num_step);
-
-    // Implement the Adjoint Differentiation
-    //result.Propagate_adj();
 
     // Print out the result of AAD
     std::cout << "\n========== Print out the result of AAD(The Greek Letters) ==========" << std::endl;
