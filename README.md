@@ -7,26 +7,32 @@ A Monte-Carlo simulation serves as an established algorithmic framework, offerin
 ## Getting Started
 ### Step.1: Cleaning and Building
 make clean
+
 make
 
 ### Step.2: Serial Monte-Carlo Simulation
 To run a serial Monte-Carlo simulation, use the following command:
+
 ./main
 
 ### Step.3: Serial Monte-Carlo Simulation with AAD
 To perform a serial Monte-Carlo simulation that incorporates AAD, use the following command:
+
 ./main_mcaad
 
 ### Step.4: Parallel Monte-Carlo Simulation
 For a parallel version of the Monte-Carlo simulation, execute the following command:
+
 ./main_pthread
 
 ### Step.5: Parallel Monte-Carlo Simulation with AAD
 Before running this simulation, make sure to check the 'reset_adjoint()' function in the 'Node_v1.h' header file (lines 52-79). Use the following command to run the simulation:
+
 ./main_multiaad
 
 ## Note
 Ensure to review and possibly adjust the 'reset_adjoint()' function in the 'Node_v1.h' header file (lines 52-79) before initiating the parallel Monte-Carlo simulation with AAD.
 
 ## Link
-Project Link: [https://github.com/STEPHAN-EOM/RISK_ANALYSIS](https://github.com/STEPHAN-EOM/RISK_ANALYSIS)
+Project Link: [STEPHAN-EOM/RISK_ANALYSIS](https://github.com/STEPHAN-EOM/RISK_ANALYSIS)
+LinkedIn: [Chanho Eom](https://www.linkedin.com/in/chanhoeom/)
