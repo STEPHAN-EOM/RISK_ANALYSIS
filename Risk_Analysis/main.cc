@@ -8,7 +8,7 @@
 #include "MCSimulation.h"
 
 int main(){
-
+    
     struct rusage usage;
 
     // Step.1 Monte-Carlo Simulation for FX rate
